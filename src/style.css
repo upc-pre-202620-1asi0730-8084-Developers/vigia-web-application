@@ -3,21 +3,26 @@
 @import "@fontsource/roboto/700.css";
 
 :root {
-  /* Controles nativos (select, scroll) siempre en claro, igual que la paleta */
+  /* Controles nativos en claro */
   color-scheme: light;
 
-  /* Tokens de Color (§4.1.1) */
-  --color-primary: #1B3A5C;
-  --color-primary-light: #3D6B94;
-  --color-accent: #F5A623;
-  --color-success: #2E7D32;
-  --color-error: #D32F2F;
-  --color-text-main: #212121;
-  --color-text-secondary: #757575;
-  --color-bg: #F5F5F5;
+  /* Tokens de Color Vigia V2 (Alineados con Mockups de Figma) */
+  --color-primary: #0F172A;       /* Slate 900 (Navy Oscuro) */
+  --color-primary-light: #1E293B; /* Slate 800 */
+  --color-accent: #FFB800;        /* Vigia Golden Yellow de Figma */
+  --color-accent-hover: #E5A600;
+  --color-accent-dark: #0F172A;
+  --color-success: #16A34A;       /* Green 600 */
+  --color-error: #DC2626;         /* Red 600 */
+  --color-warning: #D97706;       /* Amber 600 */
+  --color-info: #0284C7;          /* Sky 600 */
+  --color-text-main: #0F172A;     /* Texto principal legible */
+  --color-text-secondary: #64748B;/* Muted Slate */
+  --color-bg: #F8FAFC;            /* Fondo general de aplicación */
   --color-surface: #FFFFFF;
+  --color-border: #E2E8F0;
 
-  /* Espaciado (Grilla de 8px, §4.1.1) */
+  /* Espaciado (Grilla de 8px) */
   --sp-4: 4px;
   --sp-8: 8px;
   --sp-16: 16px;
@@ -25,16 +30,17 @@
   --sp-32: 32px;
   --sp-48: 48px;
 
-  /* Radio de borde (§4.1.1) */
+  /* Radios de borde modernos */
   --radius-actionable: 8px;
-  --radius-structural: 0px;
+  --radius-card: 14px;
+  --radius-pill: 9999px;
 
-  /* Elevaciones (§4.1.2) */
+  /* Elevaciones suaves */
   --elevation-0: none;
-  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
 
-  /* Transición (§4.1.2) */
+  /* Transición */
   --transition-default: 180ms ease-in-out;
 
   /* Tipografía */
@@ -43,10 +49,8 @@
   font-weight: 400;
   color: var(--color-text-main);
   background-color: var(--color-bg);
-  font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
@@ -67,26 +71,27 @@ body {
   min-width: 320px;
 }
 
-/* Escala tipográfica (§4.1.1) */
+/* Escala tipográfica */
 h1 {
   font-size: 28px;
   font-weight: 700;
   line-height: 1.25;
   margin: 0 0 var(--sp-16) 0;
   color: var(--color-primary);
+  letter-spacing: -0.3px;
 }
 
 h2 {
-  font-size: 22px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 600;
   line-height: 1.3;
   margin: 0 0 var(--sp-16) 0;
   color: var(--color-primary);
 }
 
 h3 {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   line-height: 1.35;
   margin: 0 0 var(--sp-8) 0;
   color: var(--color-text-main);
@@ -101,30 +106,33 @@ p, span, div, td, th {
   color: var(--color-text-secondary);
 }
 
-/* Botón de acción principal Ámbar (§3.2, §4.1) */
+/* Botón de acción principal Dorado/Amarillo Vigia (§4.4.3 Mockups) */
 .btn-accent,
 .p-button.btn-accent {
   background-color: var(--color-accent) !important;
-  border-color: var(--color-accent) !important;
-  color: #212121 !important; /* Contraste AA >= 4.5:1 */
-  font-weight: 500;
-  border-radius: var(--radius-actionable);
-  min-height: 44px;
-  min-width: 44px;
+  border: 1px solid var(--color-accent) !important;
+  color: #0F172A !important;
+  font-weight: 700 !important;
+  border-radius: var(--radius-actionable) !important;
+  min-height: 42px;
+  padding: 8px 18px !important;
+  box-shadow: 0 1px 3px rgba(255, 184, 0, 0.25);
   transition: all var(--transition-default);
 }
 
 .btn-accent:hover:not(:disabled),
 .p-button.btn-accent:hover:not(:disabled) {
-  background-color: var(--color-primary-light) !important;
-  border-color: var(--color-primary-light) !important;
-  color: #FFFFFF !important;
+  background-color: var(--color-accent-hover) !important;
+  border-color: var(--color-accent-hover) !important;
+  color: #0F172A !important;
+  transform: translateY(-1px);
 }
 
 .btn-accent:disabled,
 .p-button.btn-accent:disabled {
-  opacity: 0.4 !important;
+  opacity: 0.45 !important;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* Botón primario Azul Vigía */
@@ -133,9 +141,9 @@ p, span, div, td, th {
   background-color: var(--color-primary) !important;
   border-color: var(--color-primary) !important;
   color: #FFFFFF !important;
-  border-radius: var(--radius-actionable);
-  min-height: 44px;
-  min-width: 44px;
+  border-radius: var(--radius-actionable) !important;
+  min-height: 42px;
+  font-weight: 600;
   transition: all var(--transition-default);
 }
 
@@ -145,32 +153,43 @@ p, span, div, td, th {
   border-color: var(--color-primary-light) !important;
 }
 
-/* Botón secundario / Cancelar */
+/* Botón secundario / Cancelar / Outline */
 .btn-secondary,
 .p-button.btn-secondary {
   background-color: transparent !important;
-  border-color: #D1D5DB !important;
-  color: var(--color-text-main) !important;
-  border-radius: var(--radius-actionable);
-  min-height: 44px;
-  min-width: 44px;
+  border: 1px solid #CBD5E1 !important;
+  color: #334155 !important;
+  border-radius: var(--radius-actionable) !important;
+  min-height: 42px;
+  font-weight: 600;
   transition: all var(--transition-default);
 }
 
 .btn-secondary:hover:not(:disabled),
 .p-button.btn-secondary:hover:not(:disabled) {
-  background-color: #E5E7EB !important;
+  background-color: #F1F5F9 !important;
+  border-color: #94A3B8 !important;
 }
 
-/* Ajustes estructurales de tarjetas y contenedores */
+/* Tarjeta contenedora Vigia Card */
+.vigia-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: var(--sp-24);
+  box-shadow: var(--elevation-1);
+}
+
+/* Ajustes estructurales de PrimeVue */
 .p-card {
-  border-radius: var(--radius-actionable) !important;
+  border-radius: var(--radius-card) !important;
   box-shadow: var(--elevation-1) !important;
   background-color: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
 }
 
 .p-dialog {
-  border-radius: var(--radius-actionable) !important;
+  border-radius: var(--radius-card) !important;
   box-shadow: var(--elevation-2) !important;
 }
 
@@ -178,43 +197,61 @@ p, span, div, td, th {
   box-shadow: var(--elevation-2) !important;
 }
 
-/* Tablas estructurales con esquinas rectas (§4.1.1) */
-.p-datatable {
-  border-radius: var(--radius-structural) !important;
-}
-
-/* Tags de estado (§3.2, §4.2.2) */
-.tag-paired {
-  background-color: rgba(27, 58, 92, 0.12) !important;
-  color: #1B3A5C !important;
-  border: 1px solid #1B3A5C !important;
-  border-radius: var(--radius-actionable) !important;
-  font-weight: 500;
-}
-
-.tag-unpaired {
-  background-color: rgba(245, 166, 35, 0.15) !important;
-  color: #925400 !important;
-  border: 1px solid #F5A623 !important;
-  border-radius: var(--radius-actionable) !important;
-  font-weight: 500;
-}
-
-/* Estados de error de input (§3.2) */
-.input-error {
-  border-color: var(--color-error) !important;
-}
-
-.error-message {
-  color: var(--color-error);
+/* Status dots y pills estándar */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
   font-size: 12px;
-  margin-top: 4px;
+  font-weight: 600;
+  line-height: 1;
 }
 
-/* Tarjeta de contenido (indicadores, filtros, tablas y gráficos de los módulos) */
-.vigia-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--p-content-border-color);
-  border-radius: var(--radius-actionable);
-  padding: var(--sp-16);
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Colores de badges de estado */
+.pill-completed {
+  background-color: #DCFCE7;
+  color: #15803D;
+}
+.pill-completed .status-dot {
+  background-color: #16A34A;
+}
+
+.pill-partial,
+.pill-in-transit,
+.pill-difference {
+  background-color: #FEF3C7;
+  color: #B45309;
+}
+.pill-partial .status-dot,
+.pill-in-transit .status-dot,
+.pill-difference .status-dot {
+  background-color: #F59E0B;
+}
+
+.pill-review,
+.pill-pending-review {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+}
+.pill-review .status-dot {
+  background-color: #EF4444;
+}
+
+.pill-scheduled,
+.pill-pending {
+  background-color: #F1F5F9;
+  color: #64748B;
+}
+.pill-scheduled .status-dot,
+.pill-pending .status-dot {
+  background-color: #94A3B8;
 }
