@@ -1,7 +1,7 @@
 {
   "name": "vigia-frontend",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Vigía - Plataforma de Trazabilidad de Materiales de Construcción (Trazza Labs). Frontend SPA local con Vue 3, PrimeVue y DDD.",
   "type": "module",
   "scripts": {
