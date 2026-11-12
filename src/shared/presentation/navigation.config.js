@@ -75,13 +75,6 @@ export const navigationItems = [
         roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER, ROLES.SITE_MANAGER]
     },
     {
-        key: 'reports',
-        labelKey: 'nav.reports',
-        icon: 'pi pi-chart-bar',
-        path: '/reportes',
-        roles: [ROLES.ADMIN]
-    },
-    {
         key: 'settings',
         labelKey: 'nav.settings',
         icon: 'pi pi-cog',
