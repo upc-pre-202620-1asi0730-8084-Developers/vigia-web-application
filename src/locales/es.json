@@ -13,7 +13,6 @@
     "receptions": "Recepciones",
     "issues": "Problemas",
     "history": "Historial",
-    "reports": "Reportes",
     "settings": "Configuración",
     "more": "Más",
     "roleSelector": "Rol activo:",
@@ -384,10 +383,6 @@
       "arrived": "La unidad ingresó a la geocerca de la obra destino",
       "error": "No se pudo completar la operación"
     }
-  },
-  "modules": {
-    "placeholderTitle": "Módulo {name}",
-    "placeholderDesc": "Este módulo está planificado para el rol {role}. La navegación y permisos de acceso se encuentran activos."
   },
   "home": {
     "greeting": "Hola, {name}",

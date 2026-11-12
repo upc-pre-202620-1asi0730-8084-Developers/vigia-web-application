@@ -175,11 +175,16 @@ const comparisonPercentages = computed(() => {
                     </span>
                   </td>
                   <td class="text-right">
-                    <pv-button
-                      :label="t('receptions.arrivals.registerAction')"
-                      class="p-button-text p-button-sm btn-action"
-                      @click="emit('registerArrival', arrival)"
-                    />
+                    <div class="flex align-items-center justify-content-end gap-2">
+                      <pv-button
+                        :label="t('receptions.arrivals.registerAction')"
+                        class="p-button-outlined p-button-sm btn-pill-action"
+                        @click="emit('registerArrival', arrival)"
+                      />
+                      <button type="button" class="btn-dots" title="Más opciones">
+                        <i class="pi pi-ellipsis-h"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -246,11 +251,16 @@ const comparisonPercentages = computed(() => {
                     {{ new Date(rec.arrivedAt).toLocaleDateString() }} {{ new Date(rec.arrivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
                   </td>
                   <td class="text-right">
-                    <pv-button
-                      :label="t('common.viewDetails')"
-                      class="p-button-text p-button-sm btn-action"
-                      @click.stop="selectRow(rec)"
-                    />
+                    <div class="flex align-items-center justify-content-end gap-2">
+                      <pv-button
+                        :label="t('common.viewDetails')"
+                        class="p-button-outlined p-button-sm btn-pill-action"
+                        @click.stop="selectRow(rec)"
+                      />
+                      <button type="button" class="btn-dots" title="Más opciones" @click.stop>
+                        <i class="pi pi-ellipsis-h"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -773,11 +783,41 @@ const comparisonPercentages = computed(() => {
 }
 
 .bar-sent {
-  background-color: #3B82F6;
+  background-color: #0F172A; /* Barra oscura del mockup Figma */
 }
 
 .bar-received {
-  background-color: #F59E0B;
+  background-color: #FFB800; /* Barra dorada del mockup Figma */
+}
+
+.btn-pill-action {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  color: #334155 !important;
+  border-color: #CBD5E1 !important;
+}
+
+.btn-pill-action:hover {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+.btn-dots {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 150ms;
+}
+
+.btn-dots:hover {
+  background-color: #F1F5F9;
+  color: #0F172A;
 }
 
 .bar-caption {

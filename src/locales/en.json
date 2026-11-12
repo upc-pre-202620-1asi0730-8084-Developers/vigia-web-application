@@ -13,7 +13,6 @@
     "receptions": "Receptions",
     "issues": "Issues",
     "history": "Audit Log",
-    "reports": "Reports",
     "settings": "Settings",
     "more": "More",
     "roleSelector": "Active role:",
@@ -384,10 +383,6 @@
       "arrived": "The vehicle entered the destination site geofence",
       "error": "The operation could not be completed"
     }
-  },
-  "modules": {
-    "placeholderTitle": "{name} Module",
-    "placeholderDesc": "This module is planned for role {role}. Navigation and role permissions are active."
   },
   "home": {
     "greeting": "Hello, {name}",

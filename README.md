@@ -172,7 +172,7 @@ Tip: to use a real backend, set its URL in `VITE_LEARNING_PLATFORM_API_URL` and 
 
 ## Routing Notes
 - `/` redirects to `/inicio` (Home).
-- Main routes: `/inicio`, `/obras`, `/materiales`, `/solicitudes`, `/despachos`, `/transporte`, `/recepciones`, `/problemas`, `/historial`, `/reportes`, `/configuracion`.
+- Main routes: `/inicio`, `/obras`, `/materiales`, `/solicitudes`, `/despachos`, `/transporte`, `/recepciones`, `/problemas`, `/historial`, `/configuracion`.
 - Form pages: `/despachos/nuevo`, `/transporte/unidades/nueva`, `/transporte/unidades/:id/gps`, `/recepciones/nueva`, `/recepciones/:id/discrepancia`.
 - Detail pages: `/solicitudes/:id`, `/problemas/:id`.
 - Each route declares its allowed roles in `meta.roles`; a global `beforeEach` checks them and sets the document title.

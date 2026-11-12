@@ -10,7 +10,6 @@ import activityHistoryRoutes from './activity-history/presentation/activity-hist
 import inventoryManagementRoutes from './inventory-management/presentation/inventory-management-routes.js'
 
 // Vistas
-const modulePlaceholder = () => import('./shared/presentation/views/module-placeholder.vue');
 const pageNotFound = () => import('./shared/presentation/views/page-not-found.vue');
 const transportView = () => import('./fleet-and-device-management/presentation/views/transport-view.vue');
 const receptionManagementView = () => import('./site-reception-and-verification/presentation/views/reception-management-view.vue');
@@ -67,13 +66,6 @@ const routes = [
         name: 'reception-discrepancy',
         component: reportDiscrepancyPage,
         meta: { title: 'Reportar discrepancia', roles: [ROLES.ADMIN, ROLES.SITE_MANAGER] }
-    },
-
-    {
-        path: '/reportes',
-        name: 'reportes',
-        component: modulePlaceholder,
-        meta: { title: 'Reportes', roles: [ROLES.ADMIN] }
     },
     {
         path: '/:pathMatch(.*)*',
