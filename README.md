@@ -111,24 +111,27 @@ Switch the active role with the **Active role** selector (top bar or sidebar). E
 npm install
 ```
 
-### 2) Start the app (mock API included)
+### 2) Start the app with the real backend
 ```bash
 npm run dev
 ```
-Open http://localhost:5173. The development server also serves the mock API at `/api/v1` (see `server/vite-mock-api.cjs`), so no second terminal is needed. Data changes stay in memory and reset when the server restarts; the files in `server/data` are never modified.
+First start MySQL and run `.\scripts\start-local.ps1` from `vigia-platform`. Then open http://localhost:5173. In development, `/api/v1` is proxied to `http://localhost:5125` and the in-memory API is disabled. Sign in with a local account listed in the backend's `.local/access.json`, or register a site-manager account. Passwords are hashed on the server; API calls carry the bearer token issued at sign-in. Signing out clears the browser session.
 
-### 3) Standalone mock API (optional)
-To run the mock API on its own, for example for `test-e2e.js` or another client:
+Use `VITE_BACKEND_URL` in `.env.development.local` if the backend listens elsewhere. The backend startup script creates a separate `vigia_local_integration` database; it does not migrate your existing `EnsureCreated()` database.
+
+### 3) Legacy standalone mock API
+The original mock server remains available for inspecting the old demo dataset:
 ```bash
 npm run server
 ```
-It listens on the port of `VITE_LEARNING_PLATFORM_API_URL` (3000 when no port is set). To use it from the app, set `VITE_LEARNING_PLATFORM_API_URL="http://localhost:3000/api/v1"` in a `.env.development.local` file.
+It listens on the port of `VITE_LEARNING_PLATFORM_API_URL` (3000 when no port is set). It does not validate the new persisted authentication flow; use the real backend for integration verification.
 
-### 4) End-to-end API checks (optional)
-With the standalone mock API on port 3000 and the app running:
+### 4) API checks
+The following command checks the legacy mock API only:
 ```bash
 node test-e2e.js
 ```
+For the real API, follow `scripts/verify-local.py` and `tests/VigiaPlatform.IntegrationChecks` in the backend repository. Those checks exercise actual MySQL persistence and authorization.
 
 ### 5) Build for production
 ```bash
@@ -148,7 +151,7 @@ npm run build
 ```bash
 firebase deploy --only hosting
 ```
-Firebase Hosting only serves static files, so the production build answers `/api/v1` with an in-browser mock API (`src/shared/infrastructure/in-memory-api.js`). It uses the same dataset, route rewrites and business rules as `json-server`.
+The existing Firebase release remains the previous demo. Before publishing this integrated version, set `VITE_USE_IN_MEMORY_API="false"`, configure `VITE_LEARNING_PLATFORM_API_URL` with the deployed HTTPS API URL (or a configured hosting rewrite), and allow the Firebase origin in backend CORS. The current production environment still contains the previous mock configuration; do not deploy it as a connected release. A successful build alone does not verify cloud connectivity.
 
 ## Environment Variables
 Environment files included:
@@ -157,7 +160,8 @@ Environment files included:
 
 Main variables:
 - `VITE_LEARNING_PLATFORM_API_URL`: base URL of the API (`/api/v1` in both environments).
-- `VITE_USE_IN_MEMORY_API`: `"true"` in production to use the in-browser mock API.
+- `VITE_USE_IN_MEMORY_API`: `"false"` for real integration. The previous production demo configuration is retained until cloud deployment.
+- `VITE_BACKEND_URL`: local development proxy target; defaults to `http://localhost:5125`.
 - Endpoint paths, one per resource:
   - `VITE_PROJECTS_ENDPOINT_PATH`, `VITE_MATERIALS_ENDPOINT_PATH`, `VITE_INVENTORY_MOVEMENTS_ENDPOINT_PATH`
   - `VITE_ORDERS_ENDPOINT_PATH`, `VITE_DISPATCHES_ENDPOINT_PATH`
@@ -176,6 +180,7 @@ Tip: to use a real backend, set its URL in `VITE_LEARNING_PLATFORM_API_URL` and 
 - Form pages: `/despachos/nuevo`, `/transporte/unidades/nueva`, `/transporte/unidades/:id/gps`, `/recepciones/nueva`, `/recepciones/:id/discrepancia`.
 - Detail pages: `/solicitudes/:id`, `/problemas/:id`.
 - Each route declares its allowed roles in `meta.roles`; a global `beforeEach` checks them and sets the document title.
+- `/iam/sign-in` and `/iam/sign-up` are public; other routes require a valid local session. The backend independently enforces authentication and roles. The role selector only offers the perspectives granted to the authenticated account.
 
 ## API and Data Notes
 - The mock dataset lives in `server/data`, one JSON file per collection grouped by bounded context: `projects`, `materials`, `inventoryMovements`, `orders`, `dispatches`, `vehicles`, `geofences`, `unassociatedTelemetryEvents`, `routes`, `receptions`, `upcomingArrivals`, `discrepancyCases`, `activityRecords` and `users`.

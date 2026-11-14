@@ -25,7 +25,7 @@ const selectedOption = computed(() => roleOptions.value.find(option => option.va
  * @param {{value: string}} event
  */
 const onRoleChange = ({ value }) => {
-  iamStore.setRole(value);
+  if (!iamStore.setRole(value)) return;
   const allowedRoles = route.meta?.roles;
   if (Array.isArray(allowedRoles) && !allowedRoles.includes(value)) {
     const firstAllowed = navigationItems.find(item => item.roles.includes(value));

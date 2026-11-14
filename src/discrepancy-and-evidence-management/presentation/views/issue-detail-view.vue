@@ -5,7 +5,11 @@ import { useToast } from 'primevue'
 import { useDiscrepancyStore } from '../../application/discrepancy.store.js'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
+const contentLabel = (group, value) => {
+  const key = `issues.content.${group}.${String(value || '').replace(/\.$/, '')}`;
+  return te(key) ? t(key) : value || '—';
+};
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
@@ -97,7 +101,6 @@ const STAGE_ICONS = {
   Resolution: 'pi pi-check-circle'
 }
 
-const withoutPeriod = text => text.replace(/\.$/, '')
 </script>
 
 <template>
@@ -130,7 +133,7 @@ const withoutPeriod = text => text.replace(/\.$/, '')
           </div>
           <div class="description">
             <small>{{ t('issues.fields.description') }}</small>
-            <p class="m-0">{{ t(`issues.content.caseDescription.${withoutPeriod(discrepancyCase.description)}`) }}</p>
+            <p class="m-0">{{ contentLabel('caseDescription', discrepancyCase.description) }}</p>
           </div>
         </div>
 
@@ -146,8 +149,8 @@ const withoutPeriod = text => text.replace(/\.$/, '')
             <template #content="{ item }">
               <div class="timeline-event">
                 <span class="stage">{{ t(`issues.values.stage.${item.stage}`) }}</span>
-                <strong>{{ t(`issues.content.timelineTitle.${item.title}`) }}</strong>
-                <p class="m-0 subtitle">{{ t(`issues.content.timelineDescription.${withoutPeriod(item.description)}`) }}</p>
+                <strong>{{ contentLabel('timelineTitle', item.title) }}</strong>
+                <p class="m-0 subtitle">{{ contentLabel('timelineDescription', item.description) }}</p>
               </div>
             </template>
           </pv-timeline>
@@ -160,16 +163,16 @@ const withoutPeriod = text => text.replace(/\.$/, '')
               <img
                   v-if="!brokenImages[evidence.id]"
                   :src="evidence.evidenceUrl"
-                  :alt="t(`issues.content.evidenceCaption.${withoutPeriod(evidence.caption)}`)"
+                  :alt="contentLabel('evidenceCaption', evidence.caption)"
                   @error="brokenImages[evidence.id] = true"
               >
               <div v-else class="evidence-placeholder" role="img"
-                   :aria-label="t(`issues.content.evidenceCaption.${withoutPeriod(evidence.caption)}`)">
+                   :aria-label="contentLabel('evidenceCaption', evidence.caption)">
                 <i class="pi pi-image" aria-hidden="true" />
               </div>
               <figcaption>
-                <strong>{{ t(`issues.content.evidenceType.${evidence.type}`) }}</strong>
-                <span>{{ t(`issues.content.evidenceCaption.${withoutPeriod(evidence.caption)}`) }}</span>
+                <strong>{{ contentLabel('evidenceType', evidence.type) }}</strong>
+                <span>{{ contentLabel('evidenceCaption', evidence.caption) }}</span>
                 <small class="subtitle">{{ evidence.capturedAt }}</small>
               </figcaption>
             </figure>
@@ -184,7 +187,7 @@ const withoutPeriod = text => text.replace(/\.$/, '')
           <ul v-if="discrepancyCase.missingEvidence.length > 0" class="missing-list">
             <li v-for="evidence in discrepancyCase.missingEvidence" :key="evidence">
               <i class="pi pi-exclamation-circle" aria-hidden="true" />
-              {{ t(`issues.content.missingEvidence.${evidence}`) }}
+              {{ contentLabel('missingEvidence', evidence) }}
             </li>
           </ul>
           <p v-else class="subtitle m-0"><i class="pi pi-check mr-1" aria-hidden="true" />{{ t('issues.missingEvidence.none') }}</p>

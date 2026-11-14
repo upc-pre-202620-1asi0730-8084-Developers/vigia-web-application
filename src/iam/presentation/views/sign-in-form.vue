@@ -19,7 +19,6 @@
    */
   function performSignIn() {
     let signInCommand = new SignInCommand(form);
-    console.log(signInCommand);
     signIn(signInCommand, router);
   }
 </script>
@@ -31,6 +30,7 @@
   <p class="p-fluid mb-5">Please enter the required information to sign in.</p>
   <div>
     <form @submit.prevent="performSignIn">
+      <p v-if="store.error" role="alert" class="p-invalid">{{ store.error }}</p>
       <div class="p-fluid">
         <div class="field mt-5">
           <pv-float-label>
@@ -47,7 +47,8 @@
           </pv-float-label>
         </div>
         <div class="p-field mt-5">
-          <pv-button type="submit">Sign In</pv-button>
+          <pv-button type="submit" :loading="store.signingIn">Sign In</pv-button>
+          <router-link to="/iam/sign-up">Sign Up</router-link>
         </div>
       </div>
     </form>

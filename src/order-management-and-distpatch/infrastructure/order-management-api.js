@@ -60,8 +60,16 @@ export class OrderManagementApi extends BaseApi {
      * @param {Object} resource - Order resource payload (must include id).
      * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to the updated order response.
      */
-    updateOrder(resource) {
-        return this.#ordersEndpoint.update(resource.id, resource);
+    async updateOrder(resource) {
+        const latest = (await this.getOrderById(resource.id)).data;
+        if (latest.status === resource.status) return {data: latest};
+        const event = resource.timeline?.at(-1);
+        if (latest.status === 'PENDING' && ['APPROVED', 'REJECTED'].includes(resource.status)) {
+            await this.http.patch(`${ordersEndpointPath}/${resource.id}/status`, {status: 'UNDER_REVIEW', performedBy: 'Current user'});
+        }
+        return this.http.patch(`${ordersEndpointPath}/${resource.id}/status`, {
+            status: resource.status, performedBy: 'Current user', description: event?.description || null
+        });
     }
 
     /**
@@ -96,7 +104,7 @@ export class OrderManagementApi extends BaseApi {
      * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to the created dispatch response.
      */
     createDispatch(resource) {
-        return this.#dispatchesEndpoint.create(resource);
+        return this.http.post(`${dispatchesEndpointPath}/from-order`, {...resource, relatedOrderId: String(resource.relatedOrderId || '')});
     }
 
     /**
@@ -104,8 +112,20 @@ export class OrderManagementApi extends BaseApi {
      * @param {Object} resource - Dispatch resource payload (must include id).
      * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to the updated dispatch response.
      */
-    updateDispatch(resource) {
-        return this.#dispatchesEndpoint.update(resource.id, resource);
+    async updateDispatch(resource) {
+        let response = await this.getDispatchById(resource.id);
+        if (resource.vehicleId && Number(resource.vehicleId) !== response.data.vehicleId) {
+            response = await this.http.put(`${dispatchesEndpointPath}/${resource.id}/vehicle`, {
+                vehicleId: Number(resource.vehicleId), vehiclePlate: resource.vehiclePlate, performedBy: 'Current user'
+            });
+        }
+        const status = resource.status === 'DELIVERED' ? 'COMPLETED' : resource.status;
+        if (status && status !== response.data.status) {
+            response = status === 'CANCELLED'
+                ? await this.http.post(`${dispatchesEndpointPath}/${resource.id}/cancellation`, {reason: resource.observations || 'Cancelled by user', performedBy: 'Current user'})
+                : await this.http.patch(`${dispatchesEndpointPath}/${resource.id}/status`, {status, performedBy: 'Current user'});
+        }
+        return response;
     }
 
     /**

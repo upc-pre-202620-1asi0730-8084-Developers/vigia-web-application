@@ -49,6 +49,10 @@ export class IamApi extends BaseApi {
         return this.#usersEndpoint.getAll();
     }
 
+    getCurrentUser() {
+        return this.http.get(`${usersEndpointPath}/me`);
+    }
+
     /**
      * Retrieves one user by its identifier.
      * @param {string|number} id - User identifier.
