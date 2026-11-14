@@ -44,7 +44,24 @@ export class TransitTraceabilityApi extends BaseApi {
      * @param {Object} resource - Route resource payload (must include id).
      * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to the updated route response.
      */
-    updateRoute(resource) {
-        return this.#routesEndpoint.update(resource.id, resource);
+    async updateRoute(resource) {
+        const path = `${routesEndpointPath}/${resource.id}`;
+        let response = await this.getRouteById(resource.id);
+        const lastTime = response.data.positions.length ? Date.parse(response.data.positions.at(-1).reportedAt) : -Infinity;
+        for (const position of resource.positions || []) {
+            if (Date.parse(position.reportedAt) > lastTime) {
+                const result = await this.http.post(`${path}/positions`, position);
+                response = {...result, data: result.data.route};
+            }
+        }
+        if (resource.status === 'SIGNAL_LOST' && response.data.status !== 'SIGNAL_LOST') {
+            const result = await this.http.post(`${path}/signal-lost`, {});
+            response = {...result, data: result.data.route};
+        }
+        for (const alert of resource.alerts || []) {
+            const saved = response.data.alerts.find(a => String(a.id) === String(alert.id));
+            if (saved && alert.notifiedAt && !saved.notifiedAt) await this.http.post(`${path}/alerts/${saved.id}/notify`);
+        }
+        return this.getRouteById(resource.id);
     }
 }

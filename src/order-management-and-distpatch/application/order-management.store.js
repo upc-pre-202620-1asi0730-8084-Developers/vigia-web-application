@@ -182,11 +182,12 @@ const useOrderManagementStore = defineStore('orderManagement', () => {
      * @returns {void}
      */
     function addDispatch(dispatch) {
-        orderManagementApi.createDispatch(dispatch).then(response => {
+        return orderManagementApi.createDispatch(dispatch).then(response => {
             const newDispatch = DispatchAssembler.toEntityFromResource(response.data);
             dispatches.value.push(newDispatch);
         }).catch(error => {
             errors.value.push(error);
+            throw error;
         });
     }
 

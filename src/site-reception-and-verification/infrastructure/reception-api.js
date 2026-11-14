@@ -75,7 +75,9 @@ export class ReceptionApi extends BaseApi {
      * @returns {Promise<import('axios').AxiosResponse>}
      */
     createReception(receptionResource) {
-        return this.#receptionsEndpoint.create(receptionResource);
+        return receptionResource.id
+            ? this.updateReception(receptionResource.id, receptionResource)
+            : this.http.post(`${receptionsEndpointPath}/physical`, receptionResource);
     }
 
     /**
@@ -115,14 +117,21 @@ export class ReceptionApi extends BaseApi {
      * @returns {Promise<import('axios').AxiosResponse>}
      */
     addEvidence(receptionId, evidenceResource) {
-        return this.http.post(`${receptionsEndpointPath}/${receptionId}/evidences`, evidenceResource);
+        return this.http.post(`${receptionsEndpointPath}/${receptionId}/evidence`, {
+            fileUrl: evidenceResource.evidenceUrl, description: evidenceResource.caption || '',
+            evidenceType: evidenceResource.type || 'PHOTO'
+        });
     }
 
     /**
      * Obtiene los próximos despachos en tránsito asignados a llegar a la obra.
      * @returns {Promise<import('axios').AxiosResponse>}
      */
-    getUpcomingArrivals() {
-        return this.#upcomingArrivalsEndpoint.getAll();
+    async getUpcomingArrivals() {
+        const response = await this.#upcomingArrivalsEndpoint.getAll();
+        return {...response, data: response.data.map(arrival => ({...arrival,
+            material: arrival.materialDescription, truck: arrival.truckPlate,
+            dispatchedQuantity: arrival.expectedQuantity
+        }))};
     }
 }

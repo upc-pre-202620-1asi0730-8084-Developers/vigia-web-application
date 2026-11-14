@@ -11,7 +11,6 @@ export class SignInAssembler {
      * @returns {SignInResource|null} Parsed resource when the response is successful; otherwise null.
      */
     static toResourceFromResponse(response) {
-        console.log(response);
         if (response.status !== 200) {
             console.error(`${response.status}, ${response.statusText}`);
             return null;

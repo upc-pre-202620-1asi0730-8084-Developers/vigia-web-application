@@ -29,6 +29,7 @@ function performSignUp() {
   <p class="p-fluid mb-5">Please enter the required information to sign in.</p>
   <div>
     <form @submit.prevent="performSignUp">
+      <p v-if="store.error" role="alert" class="p-invalid">{{ store.error }}</p>
       <div class="p-fluid">
         <div class="field mt-5">
           <pv-float-label>
@@ -45,7 +46,8 @@ function performSignUp() {
           </pv-float-label>
         </div>
         <div class="p-field mt-5">
-          <pv-button type="submit">Sign Up</pv-button>
+          <pv-button type="submit" :loading="store.signingIn">Sign Up</pv-button>
+          <router-link to="/iam/sign-in">Sign In</router-link>
         </div>
       </div>
     </form>

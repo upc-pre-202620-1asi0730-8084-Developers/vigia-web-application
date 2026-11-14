@@ -29,7 +29,7 @@ onMounted(() => {
   if (!store.dispatchesLoaded) fetchDispatches();
 });
 
-const saveDispatch = () => {
+const saveDispatch = async () => {
   /**
    * Saves the dispatch as a new dispatch in preparation.
    */
@@ -40,8 +40,10 @@ const saveDispatch = () => {
     createdBy: 'Carlos Mendoza',
     createdAt: new Date().toISOString().slice(0, 16).replace('T', ' ')
   });
-  addDispatch(dispatch);
-  navigateBack();
+  try {
+    await addDispatch(dispatch);
+    navigateBack();
+  } catch { return; }
 };
 
 /**
