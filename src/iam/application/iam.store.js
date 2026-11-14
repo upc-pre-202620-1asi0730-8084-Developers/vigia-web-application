@@ -1,44 +1,84 @@
-import {defineStore} from "pinia";
-import {ref, computed} from "vue";
-import {ROLES} from "../../shared/presentation/navigation.config.js";
+import {defineStore} from 'pinia';
+import {computed, ref} from 'vue';
+import {IamApi} from '../infrastructure/iam-api.js';
+import {clearSession, readSession, saveSession} from '../infrastructure/session.js';
 
-/**
- * Store mínimo de autenticación y rol (BC-02 Identity and Access Management)
- * Provee el rol activo para filtrar la navegación global y validar permisos.
- */
 export const useIamStore = defineStore('iam', () => {
-    // Rol activo por defecto: Responsable de Almacén (quien opera BC-04)
-    const currentRole = ref(ROLES.WAREHOUSE_MANAGER);
-    const companyId = ref("c0a80101-0000-0000-0000-000000000001");
-    const currentUsername = ref("Miguel Rojas");
-    // Id del usuario activo en el dataset de usuarios (server/data/iam/users.json)
-    const currentUserId = ref("c0a80101-0000-0000-0000-000000000009");
-    const isSignedIn = ref(true);
+    const initial = readSession();
+    const session = ref(initial);
+    const error = ref('');
+    const signingIn = ref(false);
+    const currentRole = ref(initial?.activeRole || initial?.user?.role || '');
+    const isSignedIn = computed(() => Boolean(session.value?.token && session.value.expiresAt > Date.now()));
+    const currentToken = computed(() => session.value?.token || '');
+    const currentUserId = computed(() => session.value?.user?.id ?? null);
+    const currentUsername = computed(() => session.value?.user?.fullName || '');
+    const companyId = computed(() => session.value?.user?.companyId || '');
+    const allowedRoles = computed(() => session.value?.user?.allowedRoles || []);
+    const testUsers = computed(() => allowedRoles.value.map(role => ({
+        userId: currentUserId.value, name: currentUsername.value, role, label: `roles.${role}`
+    })));
 
-    const testUsers = [
-        { userId: "c0a80101-0000-0000-0000-000000000002", name: "María Torres", role: ROLES.ADMIN, label: "roles.ADMIN" },
-        { userId: "c0a80101-0000-0000-0000-000000000009", name: "Miguel Rojas", role: ROLES.WAREHOUSE_MANAGER, label: "roles.WAREHOUSE_MANAGER" },
-        { userId: "c0a80101-0000-0000-0000-000000000003", name: "Juan Pérez", role: ROLES.SITE_MANAGER, label: "roles.SITE_MANAGER" }
-    ];
+    function setRole(role) {
+        if (!allowedRoles.value.includes(role)) return false;
+        currentRole.value = role;
+        session.value.activeRole = role;
+        saveSession(session.value);
+        return true;
+    }
 
-    function setRole(newRole) {
-        currentRole.value = newRole;
-        const matched = testUsers.find(u => u.role === newRole);
-        if (matched) {
-            currentUsername.value = matched.name;
-            currentUserId.value = matched.userId;
+    function updateCurrentUser(user) {
+        if (!session.value) return;
+        session.value = {...session.value, user: {...session.value.user, ...user}};
+        saveSession(session.value);
+    }
+
+    function signOut(router) {
+        clearSession();
+        session.value = null;
+        currentRole.value = '';
+        if (router) return router.replace({name: 'iam-sign-in'}).then(() => window.location.reload());
+    }
+
+    async function signIn(command, router) {
+        signingIn.value = true;
+        error.value = '';
+        try {
+            const api = new IamApi();
+            const response = await api.signIn(command);
+            const pending = {token: response.data.accessToken, expiresAt: Date.now() + response.data.expiresIn * 1000};
+            saveSession(pending);
+            const user = (await api.getCurrentUser()).data;
+            session.value = {...pending, user, activeRole: user.role};
+            currentRole.value = user.role;
+            saveSession(session.value);
+            if (router) await router.push('/inicio');
+            return user;
+        } catch (failure) {
+            signOut();
+            error.value = failure.response?.data?.message || 'Unable to sign in. Check your credentials and the API connection.';
+            return null;
+        } finally {
+            signingIn.value = false;
         }
     }
 
-    return {
-        currentRole,
-        companyId,
-        currentUsername,
-        currentUserId,
-        isSignedIn,
-        testUsers,
-        setRole
-    };
+    async function signUp(command, router) {
+        signingIn.value = true;
+        error.value = '';
+        try {
+            await new IamApi().signUp(command);
+            return await signIn(command, router);
+        } catch (failure) {
+            error.value = failure.response?.data?.message || 'Unable to create the account. Use a password of at least 10 characters.';
+            return null;
+        } finally {
+            signingIn.value = false;
+        }
+    }
+
+    return {currentRole, companyId, currentUsername, currentUserId, currentToken, isSignedIn,
+        allowedRoles, testUsers, error, signingIn, setRole, signIn, signUp, signOut, updateCurrentUser};
 });
 
 export default useIamStore;

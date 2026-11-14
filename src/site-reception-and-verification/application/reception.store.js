@@ -150,7 +150,9 @@ export const useReceptionStore = defineStore('reception', () => {
         const payload = ReceptionAssembler.toResourceFromEntity(formData);
         const response = await receptionApi.createReception(payload);
         const entity = ReceptionAssembler.toEntityFromResource(response.data);
-        receptions.value.unshift(entity);
+        const existing = receptions.value.findIndex(r => String(r.id) === String(entity.id));
+        if (existing === -1) receptions.value.unshift(entity);
+        else receptions.value[existing] = entity;
         selectedReception.value = entity;
 
         // Remover de llegadas próximas si provenía de un despacho en tránsito
@@ -179,7 +181,11 @@ export const useReceptionStore = defineStore('reception', () => {
      * @param {Object} verificationData
      */
     async function verifyReception(receptionId, verificationData = {}) {
-        const response = await receptionApi.verifyReception(receptionId, verificationData);
+        const current = receptions.value.find(r => String(r.id) === String(receptionId));
+        const response = await receptionApi.verifyReception(receptionId, {
+            ...verificationData, checklist: {...current?.checklist, ...verificationData.checklist},
+            observations: verificationData.observations ?? current?.observations
+        });
         const updatedEntity = ReceptionAssembler.toEntityFromResource(response.data);
 
         const index = receptions.value.findIndex(r => String(r.id) === String(receptionId));
@@ -209,6 +215,7 @@ export const useReceptionStore = defineStore('reception', () => {
             status: RECEPTION_STATUS.VERIFIED_DISCREPANT,
             observations: observations,
             checklist: {
+                ...receptions.value.find(r => String(r.id) === String(receptionId))?.checklist,
                 observationsRecorded: true,
                 photographicEvidence: Boolean(evidence)
             }

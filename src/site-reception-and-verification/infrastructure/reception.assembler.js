@@ -54,10 +54,10 @@ export class ReceptionAssembler {
         return new SupportingEvidence({
             id: resource.id,
             receptionId: resource.receptionId,
-            evidenceUrl: resource.evidenceUrl,
-            capturedAt: resource.capturedAt,
-            caption: resource.caption,
-            type: resource.type
+            evidenceUrl: resource.fileUrl ?? resource.evidenceUrl,
+            capturedAt: resource.attachedAt ?? resource.capturedAt,
+            caption: resource.description ?? resource.caption,
+            type: resource.evidenceType ?? resource.type
         });
     }
 
@@ -88,23 +88,27 @@ export class ReceptionAssembler {
 
         const items = (resource.items || []).map(i => this.toItemEntity(i));
         const evidences = (resource.evidences || []).map(e => this.toEvidenceEntity(e));
-        const checklist = new ReceptionChecklist(resource.checklist || {});
+        const checklist = new ReceptionChecklist(resource.isPhysicalVerification ? {
+            materialGoodCondition: resource.materialGoodCondition, quantityVerified: resource.quantityVerified,
+            deliveryGuideReceived: resource.deliveryGuideReceived, observationsRecorded: resource.observationsRecorded,
+            photographicEvidence: evidences.length > 0
+        } : resource.checklist || {});
 
         return new Reception({
             id: resource.id,
             dispatchId: resource.dispatchId,
             verifiedByUserId: resource.verifiedByUserId,
-            verifiedByUserName: resource.verifiedByUserName,
+            verifiedByUserName: resource.siteResidentName ?? resource.verifiedByUserName,
             siteId: resource.siteId,
             siteName: resource.siteName,
             origin: resource.origin,
-            truckPlate: resource.truckPlate,
+            truckPlate: resource.carrierPlate ?? resource.truckPlate,
             driverName: resource.driverName,
-            deliveryGuideNumber: resource.deliveryGuideNumber,
-            arrivedAt: resource.arrivedAt,
+            deliveryGuideNumber: resource.deliveryNoteNumber ?? resource.deliveryGuideNumber,
+            arrivedAt: resource.arrivalRegisteredAt ?? resource.arrivedAt,
             closedAt: resource.closedAt,
-            status: resource.status,
-            observations: resource.observations,
+            status: ({ConformantClosed: 'VERIFIED_CONFORMANT', DiscrepancyReported: 'VERIFIED_DISCREPANT'})[resource.status] || 'ARRIVED',
+            observations: resource.receiverNotes ?? resource.observations,
             items: items,
             evidences: evidences,
             checklist: checklist

@@ -11,7 +11,7 @@ export class DispatchAssembler {
      * @returns {Dispatch} Dispatch entity.
      */
     static toEntityFromResource(resource) {
-        return new Dispatch({...resource})
+        return new Dispatch({...resource, status: resource.status === 'COMPLETED' ? 'DELIVERED' : resource.status})
     }
 
     /**

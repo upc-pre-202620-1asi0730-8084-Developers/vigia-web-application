@@ -47,7 +47,7 @@ const saveProfile = () => {
   Object.assign(fieldErrors, validation);
   if (Object.keys(validation).length) return;
   profileStore.saveProfile(draft).then(saved => {
-    iamStore.currentUsername = saved.fullName;
+    iamStore.updateCurrentUser(saved);
     editing.value = false;
     toast.add({severity: 'success', summary: t('settings.profile.saved'), life: 3000});
   }).catch(error => toast.add({severity: 'error', summary: t('errors.occurred'), detail: error.message, life: 4000}));

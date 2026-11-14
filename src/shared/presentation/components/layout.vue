@@ -40,7 +40,7 @@ function toggleUserMenu() {
 }
 
 function selectRole(newRole) {
-  iamStore.setRole(newRole);
+  if (!iamStore.setRole(newRole)) return;
   isUserMenuOpen.value = false;
 
   const allowedRoles = route.meta?.roles;
@@ -155,6 +155,7 @@ onUnmounted(() => {
                 </div>
 
                 <div class="dropdown-footer">
+                  <button type="button" class="dropdown-footer-link" @click="iamStore.signOut(router)">Sign out</button>
                   <button type="button" class="dropdown-footer-link" @click="goToSettings">
                     <i class="pi pi-cog mr-2"></i>
                     <span>{{ t('nav.settings') }}</span>

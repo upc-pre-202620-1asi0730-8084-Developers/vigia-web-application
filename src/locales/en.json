@@ -253,6 +253,12 @@
     },
     "action": {
       "DISPATCH_CREATED": "Dispatch created for {detail}",
+      "DISPATCH_UPDATED": "Dispatch updated for {detail}",
+      "ROUTE_STARTED": "Tracking started toward {detail}",
+      "ROUTE_UPDATED": "Tracking updated toward {detail}",
+      "RECEPTION_REGISTERED": "Reception registered at {detail}",
+      "RECEPTION_VERIFIED": "Reception updated at {detail}",
+      "CASE_UPDATED": "Discrepancy case updated: {detail}",
       "TRANSIT_STARTED": "In transit to {detail}",
       "RECEPTION_RECORDED": "Reception recorded at {detail}",
       "RECEPTION_WITH_DISCREPANCY": "Reception recorded with discrepancy at {detail}",

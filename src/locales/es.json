@@ -253,6 +253,12 @@
     },
     "action": {
       "DISPATCH_CREATED": "Despacho creado para {detail}",
+      "DISPATCH_UPDATED": "Despacho actualizado para {detail}",
+      "ROUTE_STARTED": "Seguimiento iniciado hacia {detail}",
+      "ROUTE_UPDATED": "Seguimiento actualizado hacia {detail}",
+      "RECEPTION_REGISTERED": "Recepción registrada en {detail}",
+      "RECEPTION_VERIFIED": "Recepción actualizada en {detail}",
+      "CASE_UPDATED": "Caso de discrepancia actualizado: {detail}",
       "TRANSIT_STARTED": "En tránsito hacia {detail}",
       "RECEPTION_RECORDED": "Recepción registrada en {detail}",
       "RECEPTION_WITH_DISCREPANCY": "Recepción registrada con discrepancia en {detail}",

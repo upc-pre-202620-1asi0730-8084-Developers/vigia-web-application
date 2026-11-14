@@ -83,12 +83,12 @@ function applyArrival(arrival) {
   selectedArrivalId.value = arrival.id || arrival.dispatchId;
   form.origin = arrival.origin || '';
   form.dispatchId = arrival.dispatchId || arrival.id || '';
-  form.deliveryGuideNumber = arrival.deliveryGuideNumber || `GR-${Math.floor(10000 + Math.random() * 90000)}`;
-  form.truckPlate = arrival.truckPlate || arrival.truck || 'TR-315';
-  form.driverName = arrival.driverName || 'Carlos Mendoza';
-  form.siteName = arrival.siteName || 'Torre A';
+  form.deliveryGuideNumber = arrival.deliveryGuideNumber || '';
+  form.truckPlate = arrival.truckPlate || arrival.truck || '';
+  form.driverName = arrival.driverName || '';
+  form.siteName = arrival.siteName || '';
 
-  form.items = [
+  form.items = arrival.items?.length ? arrival.items.map((item, index) => ({...item, id: index + 1})) : [
     {
       id: 1,
       materialName: arrival.material || 'Material en tránsito',
@@ -133,8 +133,9 @@ async function onSubmit() {
 
   try {
     const payload = {
+      id: route.query.reception ? Number(route.query.reception) : null,
       dispatchId: form.dispatchId,
-      verifiedByUserId: iamStore.companyId,
+      verifiedByUserId: iamStore.currentUserId,
       verifiedByUserName: iamStore.currentUsername,
       siteName: form.siteName,
       origin: form.origin,

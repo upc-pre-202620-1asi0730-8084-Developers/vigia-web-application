@@ -1,5 +1,6 @@
 import {createRouter, createWebHashHistory} from "vue-router";
 import useIamStore from "./iam/application/iam.store.js";
+import iamRoutes from './iam/presentation/iam-routes.js';
 import { ROLES, navigationItems } from "./shared/presentation/navigation.config.js";
 import { discrepancyRoutes } from './discrepancy-and-evidence-management/presentation/discrepancy-routes.js'
 import orderManagementRoutes from './order-management-and-distpatch/presentation/order-management-routes.js'
@@ -19,6 +20,7 @@ const registerReceptionPage = () => import('./site-reception-and-verification/pr
 const reportDiscrepancyPage = () => import('./site-reception-and-verification/presentation/views/report-discrepancy-page.vue');
 
 const routes = [
+    ...iamRoutes,
 
     ...discrepancyRoutes,
     ...orderManagementRoutes,
@@ -86,6 +88,8 @@ router.beforeEach((to, from, next) => {
     const baseTitle = 'Vigía';
     const pageTitle = to.meta['title'] || 'Plataforma';
     document.title = `${baseTitle} - ${pageTitle}`;
+    if (!to.meta.public && !iamStore.isSignedIn) return next({name: 'iam-sign-in'});
+    if (to.meta.public && iamStore.isSignedIn) return next('/inicio');
 
     // Si la ruta define roles permitidos, verificar que el rol activo tenga acceso
     if (to.meta && Array.isArray(to.meta.roles)) {
@@ -104,3 +108,5 @@ router.beforeEach((to, from, next) => {
 });
 
 export default router;
+
+window.addEventListener('vigia:session-expired', () => useIamStore().signOut(router));
