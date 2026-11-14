@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useReceptionStore } from '../../application/reception.store.js';
 import { RECEPTION_STATUS } from '../../domain/reception-status.js';
+import useIamStore from '../../../iam/application/iam.store.js';
 
 const props = defineProps({
   onRegisterClick: {
@@ -15,6 +16,7 @@ const emit = defineEmits(['reportIssue', 'editReception', 'viewGallery', 'regist
 
 const { t } = useI18n();
 const receptionStore = useReceptionStore();
+const iamStore = useIamStore();
 
 const timeFilter = ref('last7days');
 const isDetailsOpen = ref(true);
@@ -29,6 +31,8 @@ const timeFilterOptions = [
 const selectedItem = computed(() => {
   return receptionStore.selectedReception || receptionStore.receptions[0] || null;
 });
+const canEditSelected = computed(() => selectedItem.value && !selectedItem.value.isClosed &&
+    String(selectedItem.value.verifiedByUserId) === String(iamStore.currentUserId));
 
 function selectRow(item) {
   receptionStore.selectReception(item);
@@ -411,12 +415,14 @@ const comparisonPercentages = computed(() => {
             :label="t('receptions.actions.reportIssue')"
             icon="pi pi-exclamation-circle"
             class="btn-secondary w-full"
+            :disabled="!canEditSelected"
             @click="emit('reportIssue', selectedItem)"
           />
           <pv-button
             :label="selectedItem.hasDiscrepancy ? t('receptions.actions.editReception') : t('receptions.actions.confirmReception')"
             icon="pi pi-pencil"
             class="btn-accent w-full"
+            :disabled="!canEditSelected"
             @click="emit('editReception', selectedItem)"
           />
         </div>

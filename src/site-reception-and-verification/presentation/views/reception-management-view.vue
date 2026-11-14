@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue';
 import { useRouter } from 'vue-router';
 import { useReceptionStore } from '../../application/reception.store.js';
 import useIamStore from '../../../iam/application/iam.store.js';
@@ -14,6 +15,7 @@ const { t } = useI18n();
 const router = useRouter();
 const receptionStore = useReceptionStore();
 const iamStore = useIamStore();
+const toast = useToast();
 
 // Modo de vista: 'site_manager' (Responsable de Obra) o 'supervisor' (Supervisor / Admin)
 const currentPerspective = ref('site_manager');
@@ -85,8 +87,9 @@ async function handleConfirmReception(reception) {
       status: reception.hasDiscrepancy ? 'VERIFIED_DISCREPANT' : 'VERIFIED_CONFORMANT',
       closedAt: new Date().toISOString()
     });
+    toast.add({severity: 'success', summary: t('receptions.dialog.saved'), life: 3000});
   } catch (err) {
-    console.error('Error al confirmar recepción:', err);
+    toast.add({severity: 'error', summary: t('errors.occurred'), detail: err.message, life: 4000});
   }
 }
 </script>
@@ -149,7 +152,7 @@ async function handleConfirmReception(reception) {
     <div v-else-if="currentPerspective === 'site_manager'">
       <SiteManagerReceptionView
         @reportIssue="goToDiscrepancy"
-        @editReception="goToRegister"
+        @editReception="reception => reception.hasDiscrepancy ? goToRegister(reception) : handleConfirmReception(reception)"
         @viewGallery="openGalleryDialog"
         @registerArrival="goToRegister"
       />
