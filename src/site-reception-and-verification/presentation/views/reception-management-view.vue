@@ -6,12 +6,14 @@ import { useRouter } from 'vue-router';
 import { useReceptionStore } from '../../application/reception.store.js';
 import useIamStore from '../../../iam/application/iam.store.js';
 import { ROLES } from '../../../shared/presentation/navigation.config.js';
+import { formatCurrentDate } from '../../../shared/presentation/formatters.js';
 
 import SiteManagerReceptionView from '../components/site-manager-reception-view.vue';
 import SupervisorReceptionView from '../components/supervisor-reception-view.vue';
 import EvidenceGalleryDialog from '../components/evidence-gallery-dialog.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const formattedDate = computed(() => formatCurrentDate(locale.value));
 const router = useRouter();
 const receptionStore = useReceptionStore();
 const iamStore = useIamStore();
@@ -129,7 +131,7 @@ async function handleConfirmReception(reception) {
         <!-- Indicador de fecha del mockup -->
         <div class="date-badge">
           <i class="pi pi-calendar mr-2 text-secondary"></i>
-          <span>Mon, April 14, 2025</span>
+          <span>{{ formattedDate }}</span>
         </div>
 
         <!-- Botón de Registrar Recepción (§4.4.3 Mockup 4receptions.png) -->

@@ -6,7 +6,7 @@ Vigía is a construction materials traceability platform by Trazza Labs. It foll
 This repository holds the web client, a Vue 3 + Vite single-page application organized with a domain-driven design (DDD) style: every feature lives in its own bounded context, and business concepts stay separated from UI and infrastructure concerns.
 
 - **Live app:** https://vigia-frontend-8084.web.app
-- **Landing page:** https://upc-pre-202620-1asi0730-8084-developers.github.io/vigia-landing/
+- **Landing page:** https://upc-pre-202620-1asi0730-8084-developers.github.io/vigia-website/
 
 ## Goals
 - Digitize the chain of custody of construction materials, from warehouse dispatch to site reception.
@@ -151,7 +151,7 @@ npm run build
 ```bash
 firebase deploy --only hosting
 ```
-The existing Firebase release remains the previous demo. Before publishing this integrated version, set `VITE_USE_IN_MEMORY_API="false"`, configure `VITE_LEARNING_PLATFORM_API_URL` with the deployed HTTPS API URL (or a configured hosting rewrite), and allow the Firebase origin in backend CORS. The current production environment still contains the previous mock configuration; do not deploy it as a connected release. A successful build alone does not verify cloud connectivity.
+The hosted Firebase release is connected to the deployed REST API in Azure (`https://vigia-api-8084.northcentralus.cloudapp.azure.com/api/v1`) with `VITE_USE_IN_MEMORY_API="false"`. Ensure `VITE_PRIME_UI_LICENSE_KEY` is configured in `.env.production` before running `npm run build` and `firebase deploy --only hosting`.
 
 ## Environment Variables
 Environment files included:
@@ -159,8 +159,8 @@ Environment files included:
 - `.env.production`
 
 Main variables:
-- `VITE_LEARNING_PLATFORM_API_URL`: base URL of the API (`/api/v1` in both environments).
-- `VITE_USE_IN_MEMORY_API`: `"false"` for real integration. The previous production demo configuration is retained until cloud deployment.
+- `VITE_LEARNING_PLATFORM_API_URL`: base URL of the API (`/api/v1` in development with Vite proxy; Azure HTTPS URL in production).
+- `VITE_USE_IN_MEMORY_API`: `"false"` for real backend integration (`"true"` enables the in-browser mock adapter for offline demos).
 - `VITE_BACKEND_URL`: local development proxy target; defaults to `http://localhost:5125`.
 - Endpoint paths, one per resource:
   - `VITE_PROJECTS_ENDPOINT_PATH`, `VITE_MATERIALS_ENDPOINT_PATH`, `VITE_INVENTORY_MOVEMENTS_ENDPOINT_PATH`

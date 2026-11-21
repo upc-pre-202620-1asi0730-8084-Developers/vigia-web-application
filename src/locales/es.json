@@ -1,7 +1,11 @@
 {
   "brand": {
     "name": "Vigía",
-    "tagline": "Trazabilidad de materiales de construcción"
+    "tagline": "Trazabilidad de materiales de construcción",
+    "menuTagline": "CONSTRUYE CON VISIÓN",
+    "sloganLine1": "Materiales en movimiento.",
+    "sloganLine2": "Obras bajo control.",
+    "sloganFooter": "Vigía | Plataforma de trazabilidad para construcción y logística."
   },
   "nav": {
     "home": "Inicio",
@@ -16,7 +20,11 @@
     "settings": "Configuración",
     "more": "Más",
     "roleSelector": "Rol activo:",
-    "language": "Idioma"
+    "language": "Idioma",
+    "signOut": "Cerrar sesión",
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "welcome": "Bienvenido, {name}"
   },
   "roles": {
     "ADMIN": "Supervisor (Admin)",
@@ -70,9 +78,12 @@
       "new": "Definir geocerca",
       "typeLabel": "Tipo de predio",
       "siteLabel": "Predio",
+      "sitePlaceholder": "Selecciona un predio",
       "nameLabel": "Nombre de la geocerca",
       "namePlaceholder": "Ej. Geocerca Almacén Lurín",
       "radiusLabel": "Radio (metros)",
+      "radiusRangeHint": "Rango sugerido: 10 m – 5000 m",
+      "radiusMeters": "Radio: {radius} metros",
       "centerLabel": "Ubicación del centro",
       "centerSelected": "Centro fijado en: {lat}, {lng}",
       "centerNotSelected": "Haz clic en el mapa para ubicar el centro de la geocerca.",
@@ -89,6 +100,9 @@
       "legend": {
         "warehouse": "Geocerca de almacén",
         "jobSite": "Geocerca de obra",
+        "warehouseSummary": "Almacenes (Azul)",
+        "jobSiteSummary": "Obras (Ámbar)",
+        "preview": "Vista previa",
         "selected": "Centro seleccionado"
       }
     },
@@ -473,7 +487,8 @@
     "viewAll": "Ver todos",
     "cancel": "Cancelar",
     "close": "Cerrar",
-    "loading": "Cargando datos..."
+    "loading": "Cargando datos...",
+    "loadingMap": "Cargando mapa..."
   },
   "issues": {
     "title": "Incidencias",
@@ -882,6 +897,20 @@
         "transportation": "Transporte",
         "confirmation": "Confirmación"
       }
+    }
+  },
+  "iam": {
+    "usernameLabel": "Usuario",
+    "usernameRequired": "El usuario es obligatorio.",
+    "passwordLabel": "Contraseña",
+    "passwordRequired": "La contraseña es obligatoria.",
+    "signIn": {
+      "title": "Iniciar sesión",
+      "subtitle": "Ingresa los datos requeridos para iniciar sesión."
+    },
+    "signUp": {
+      "title": "Crear cuenta",
+      "subtitle": "Ingresa los datos requeridos para registrarte."
     }
   },
   "errors": {

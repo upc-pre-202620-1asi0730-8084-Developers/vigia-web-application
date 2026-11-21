@@ -2,7 +2,9 @@
 import useIamStore from "../../application/iam.store.js";
 import {useRouter} from "vue-router";
 import {computed} from "vue";
+import {useI18n} from "vue-i18n";
 
+const {t} = useI18n();
 const router = useRouter();
 const store = useIamStore();
 const {signOut} = store;
@@ -38,12 +40,12 @@ function performSignOut() {
 <template>
   <div>
     <div v-if="isSignedIn">
-      <span class="p-button-text bg-primary"> Welcome, {{ currentUsername }}</span>
-      <pv-button class="bg-primary" text @click="performSignOut">Sign Out</pv-button>
+      <span class="p-button-text bg-primary"> {{ t('nav.welcome', { name: currentUsername }) }}</span>
+      <pv-button class="bg-primary" text @click="performSignOut">{{ t('nav.signOut') }}</pv-button>
     </div>
     <div v-else>
-      <pv-button class="bg-primary" text @click="performSignIn">Sign In</pv-button>
-      <pv-button class="bg-primary" text @click="performSignUp">Sign Up</pv-button>
+      <pv-button class="bg-primary" text @click="performSignIn">{{ t('nav.signIn') }}</pv-button>
+      <pv-button class="bg-primary" text @click="performSignUp">{{ t('nav.signUp') }}</pv-button>
     </div>
   </div>
 </template>
