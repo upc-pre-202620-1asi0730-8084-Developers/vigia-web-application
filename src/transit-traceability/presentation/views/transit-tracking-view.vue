@@ -7,10 +7,12 @@ import {LCircle, LCircleMarker, LMap, LPolyline, LPopup, LTileLayer} from "@vue-
 import useTransitTraceabilityStore from "../../application/transit-traceability.store.js";
 import {SIMULATION_MODE} from "../../infrastructure/telemetry-simulator.js";
 import {ROUTE_STATUS, routeStatusSeverity, transitAlertSeverity, TRANSIT_ALERT_TYPE} from "../../domain/route-status.js";
+import {useMapLoading} from "../../../shared/presentation/use-map-loading.js";
 
 const {t, te, locale} = useI18n();
 const toast = useToast();
 const store = useTransitTraceabilityStore();
+const {isMapLoading, markLoaded, startFallbackTimer} = useMapLoading();
 const {routes, routesLoaded, errors, activeCount, deviatedCount, stoppedCount, pendingNotificationsCount} = toRefs(store);
 const {fetchRoutes, getRouteById, reportPosition, reportSignalLost, notifyDestinationSite} = store;
 
@@ -58,6 +60,10 @@ const mapCenter = computed(() => selectedRoute.value?.currentPosition ? toLatLng
 const fitToRoute = () => {
   const leafletMap = map.value?.leafletObject;
   if (leafletMap && plannedLatLngs.value.length) leafletMap.fitBounds(plannedLatLngs.value, {padding: [24, 24]});
+};
+const onMapReady = () => {
+  startFallbackTimer();
+  fitToRoute();
 };
 watch(selectedRouteId, () => nextTick(fitToRoute));
 
@@ -182,12 +188,17 @@ const notifySite = alertId => run(() => notifyDestinationSite(selectedRoute.valu
               </div>
 
               <div class="map-container">
-                <l-map ref="map" :zoom="12" :center="mapCenter" :use-global-leaflet="false" @ready="fitToRoute">
+                <div v-if="isMapLoading" class="vigia-map-loading-overlay" role="status" aria-live="polite">
+                  <i class="pi pi-spin pi-spinner text-3xl" aria-hidden="true"></i>
+                  <span>{{ t('common.loadingMap') }}</span>
+                </div>
+                <l-map ref="map" :zoom="12" :center="mapCenter" :use-global-leaflet="false" @ready="onMapReady">
                   <l-tile-layer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       layer-type="base"
                       name="OpenStreetMap"
                       attribution="&copy; OpenStreetMap contributors"
+                      @load="markLoaded"
                   />
                   <l-circle
                       :lat-lng="toLatLng(selectedRoute.destination)"
@@ -304,6 +315,7 @@ const notifySite = alertId => run(() => notifyDestinationSite(selectedRoute.valu
 }
 
 .map-container {
+  position: relative;
   height: 420px;
   border-radius: var(--radius-actionable);
   overflow: hidden;

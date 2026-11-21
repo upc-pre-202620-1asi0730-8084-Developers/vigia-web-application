@@ -1,7 +1,11 @@
 {
   "brand": {
     "name": "Vigía",
-    "tagline": "Construction materials traceability"
+    "tagline": "Construction materials traceability",
+    "menuTagline": "BUILDS WITH VISION",
+    "sloganLine1": "Materials in motion.",
+    "sloganLine2": "Projects under control.",
+    "sloganFooter": "Vigía | Tracking platform for construction and logistics."
   },
   "nav": {
     "home": "Home",
@@ -16,7 +20,11 @@
     "settings": "Settings",
     "more": "More",
     "roleSelector": "Active role:",
-    "language": "Language"
+    "language": "Language",
+    "signOut": "Sign out",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "welcome": "Welcome, {name}"
   },
   "roles": {
     "ADMIN": "Supervisor (Admin)",
@@ -33,7 +41,7 @@
     },
     "vehicles": {
       "title": "Transportation Fleet",
-      "new": "Registrar unidad",
+      "new": "Register vehicle",
       "plate": "License Plate",
       "brand": "Brand",
       "model": "Model",
@@ -41,15 +49,15 @@
       "gpsDevice": "GPS Device",
       "status": "Status",
       "actions": "Actions",
-      "pairAction": "Vincular dispositivo",
-      "empty": "Aún no hay unidades registradas. Registra la primera unidad para poder asignarla a un despacho.",
-      "pairedTag": "Vinculado",
-      "unpairedTag": "Sin dispositivo",
-      "registeredToast": "Unidad de transporte registrada",
-      "pairedToast": "Dispositivo GPS vinculado a la unidad",
+      "pairAction": "Pair device",
+      "empty": "No vehicles registered yet. Register the first unit to assign it to a dispatch.",
+      "pairedTag": "Paired",
+      "unpairedTag": "Unpaired",
+      "registeredToast": "Transport unit registered",
+      "pairedToast": "GPS device paired to vehicle",
       "dialog": {
-        "registerTitle": "Registrar unidad de transporte",
-        "pairTitle": "Vincular dispositivo GPS",
+        "registerTitle": "Register transport unit",
+        "pairTitle": "Pair GPS device",
         "plateLabel": "Unit License Plate",
         "platePlaceholder": "E.g. ABC-123",
         "brandLabel": "Brand",
@@ -60,26 +68,29 @@
         "gpsLabel": "GPS Device ID (optional)",
         "gpsPlaceholder": "E.g. GPS-TR-101",
         "gpsDeviceLabel": "GPS Device ID",
-        "submitRegister": "Registrar unidad",
-        "submitPair": "Vincular dispositivo",
-        "cancel": "Cancelar"
+        "submitRegister": "Register vehicle",
+        "submitPair": "Pair device",
+        "cancel": "Cancel"
       }
     },
     "geofences": {
       "title": "Facility Geofences",
-      "new": "Definir geocerca",
+      "new": "Define geofence",
       "typeLabel": "Facility type",
       "siteLabel": "Site",
+      "sitePlaceholder": "Select a site",
       "nameLabel": "Geofence name",
       "namePlaceholder": "E.g. Lurin Warehouse Geofence",
       "radiusLabel": "Radius (meters)",
+      "radiusRangeHint": "Suggested range: 10 m – 5000 m",
+      "radiusMeters": "Radius: {radius} meters",
       "centerLabel": "Center point",
       "centerSelected": "Center set at: {lat}, {lng}",
       "centerNotSelected": "Click on the map to place the geofence center.",
-      "submit": "Definir geocerca",
-      "cancel": "Cancelar",
-      "definedWarehouseToast": "Geocerca de almacén definida",
-      "definedJobSiteToast": "Geocerca de obra definida",
+      "submit": "Define geofence",
+      "cancel": "Cancel",
+      "definedWarehouseToast": "Warehouse geofence defined",
+      "definedJobSiteToast": "Job site geofence defined",
       "empty": "No geofences registered yet.",
       "types": {
         "WAREHOUSE": "Warehouse",
@@ -89,21 +100,24 @@
       "legend": {
         "warehouse": "Warehouse Geofence",
         "jobSite": "Job Site Geofence",
+        "warehouseSummary": "Warehouses (Blue)",
+        "jobSiteSummary": "Job Sites (Amber)",
+        "preview": "Preview",
         "selected": "Selected Center"
       }
     },
     "errors": {
-      "plateRequired": "Ingresa la placa de la unidad.",
-      "capacityInvalid": "Ingresa una capacidad mayor a 0 toneladas.",
-      "plateDuplicate": "Ya existe una unidad registrada con la placa {plate}.",
-      "deviceAlreadyAssigned": "El dispositivo {deviceId} ya está vinculado a la unidad {plate}. Ingresa otro dispositivo.",
-      "siteAlreadyHasGeofence": "Este predio ya tiene una geocerca definida.",
-      "nameRequired": "Ingresa el nombre de la geocerca.",
-      "siteRequired": "Selecciona el predio.",
-      "radiusInvalid": "Ingresa un radio válido entre 10 y 5000 metros.",
-      "centerRequired": "Selecciona un punto en el mapa para ubicar la geocerca.",
-      "deviceRequired": "Ingresa el ID del dispositivo GPS.",
-      "networkError": "No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo."
+      "plateRequired": "Enter the vehicle license plate.",
+      "capacityInvalid": "Enter a capacity greater than 0 tons.",
+      "plateDuplicate": "A vehicle with license plate {plate} is already registered.",
+      "deviceAlreadyAssigned": "Device {deviceId} is already paired to vehicle {plate}. Enter another device.",
+      "siteAlreadyHasGeofence": "This site already has a defined geofence.",
+      "nameRequired": "Enter the geofence name.",
+      "siteRequired": "Select the site.",
+      "radiusInvalid": "Enter a valid radius between 10 and 5000 meters.",
+      "centerRequired": "Click a point on the map to place the geofence.",
+      "deviceRequired": "Enter the GPS device ID.",
+      "networkError": "Could not connect to the server. Check your connection and try again."
     }
   },
   "projects": {
@@ -473,7 +487,8 @@
     "viewAll": "View all",
     "cancel": "Cancel",
     "close": "Close",
-    "loading": "Loading data..."
+    "loading": "Loading data...",
+    "loadingMap": "Loading map..."
   },
   "issues": {
     "title": "Issues",
@@ -882,6 +897,20 @@
         "transportation": "Transportation",
         "confirmation": "Confirmation"
       }
+    }
+  },
+  "iam": {
+    "usernameLabel": "Username",
+    "usernameRequired": "Username is required.",
+    "passwordLabel": "Password",
+    "passwordRequired": "Password is required.",
+    "signIn": {
+      "title": "Sign In",
+      "subtitle": "Please enter the required information to sign in."
+    },
+    "signUp": {
+      "title": "Sign Up",
+      "subtitle": "Please enter the required information to sign up."
     }
   },
   "errors": {

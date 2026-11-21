@@ -5,15 +5,17 @@ import { useI18n } from 'vue-i18n';
 import Sidebar from './sidebar.vue';
 import LanguageSwitcher from './language-switcher.vue';
 import FooterContent from './footer-content.vue';
-import { navigationItems, ROLES } from '../navigation.config.js';
+import { navigationItems } from '../navigation.config.js';
+import { formatCurrentDate } from '../formatters.js';
 import useIamStore from '../../../iam/application/iam.store.js';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const iamStore = useIamStore();
 
 const isUserMenuOpen = ref(false);
+const formattedDate = computed(() => formatCurrentDate(locale.value));
 
 const currentNav = computed(() => {
   return navigationItems.find(item => route.path.startsWith(item.path)) || { key: 'home', labelKey: 'nav.home', icon: 'pi pi-home' };
@@ -30,9 +32,7 @@ const userInitials = computed(() => {
 });
 
 const currentRoleDisplay = computed(() => {
-  if (iamStore.currentRole === ROLES.SITE_MANAGER) return 'Site Manager';
-  if (iamStore.currentRole === ROLES.ADMIN) return 'Supervisor';
-  return 'Warehouse Manager';
+  return iamStore.currentRole ? t(`roles.${iamStore.currentRole}`) : '';
 });
 
 function toggleUserMenu() {
@@ -101,7 +101,7 @@ onUnmounted(() => {
           <!-- Indicador de Fecha (§4.4.3 Mockups Figma) -->
           <div class="topbar-date-pill">
             <i class="pi pi-calendar mr-2 text-secondary"></i>
-            <span>Mon, April 14, 2025</span>
+            <span>{{ formattedDate }}</span>
           </div>
 
           <!-- Selector de Idioma -->
@@ -155,7 +155,7 @@ onUnmounted(() => {
                 </div>
 
                 <div class="dropdown-footer">
-                  <button type="button" class="dropdown-footer-link" @click="iamStore.signOut(router)">Sign out</button>
+                  <button type="button" class="dropdown-footer-link" @click="iamStore.signOut(router)">{{ t('nav.signOut') }}</button>
                   <button type="button" class="dropdown-footer-link" @click="goToSettings">
                     <i class="pi pi-cog mr-2"></i>
                     <span>{{ t('nav.settings') }}</span>

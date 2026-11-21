@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { navigationItems, ROLES } from '../navigation.config.js';
+import { navigationItems } from '../navigation.config.js';
 import useIamStore from '../../../iam/application/iam.store.js';
 
 const { t } = useI18n();
@@ -19,9 +19,7 @@ const allowedItems = computed(() => {
 
 // Etiqueta del rol visible bajo el logo
 const currentRoleDisplay = computed(() => {
-  if (iamStore.currentRole === ROLES.SITE_MANAGER) return 'Site Manager';
-  if (iamStore.currentRole === ROLES.ADMIN) return 'Supervisor';
-  return 'Warehouse Manager';
+  return iamStore.currentRole ? t(`roles.${iamStore.currentRole}`) : '';
 });
 
 // En mobile/tablet (<960px): máximo 4 accesos principales + "Más"
@@ -52,10 +50,10 @@ const navigateFromMore = (path) => {
     <div class="sidebar-header">
       <div class="brand-container">
         <div class="brand-title-row">
-          <span class="brand-title">Vigia</span>
+          <span class="brand-title">{{ t('brand.name') }}</span>
           <span class="brand-accent-line"></span>
         </div>
-        <span class="brand-tagline">BUILDS WITH VISION</span>
+        <span class="brand-tagline">{{ t('brand.menuTagline') }}</span>
       </div>
       <div class="role-badge-row">
         <span class="role-badge-text">{{ currentRoleDisplay }}</span>
@@ -82,9 +80,9 @@ const navigateFromMore = (path) => {
     <!-- Footer de barra lateral: Slogan oficial de Vigia (§4.4.3 Mockups) -->
     <div class="sidebar-footer">
       <div class="sidebar-slogan">
-        <p class="slogan-line font-medium m-0">Materials in motion.</p>
-        <p class="slogan-line font-medium m-0 mb-2">Projects under control.</p>
-        <p class="slogan-sub m-0">Vigia | Tracking platform for construction and logistics.</p>
+        <p class="slogan-line font-medium m-0">{{ t('brand.sloganLine1') }}</p>
+        <p class="slogan-line font-medium m-0 mb-2">{{ t('brand.sloganLine2') }}</p>
+        <p class="slogan-sub m-0">{{ t('brand.sloganFooter') }}</p>
       </div>
     </div>
   </aside>

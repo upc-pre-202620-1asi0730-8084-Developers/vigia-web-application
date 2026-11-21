@@ -8,6 +8,7 @@ import { LMap, LTileLayer, LMarker, LCircle, LPopup } from '@vue-leaflet/vue-lea
 import { useFleetStore } from '../../application/fleet.store.js';
 import { GeofenceType } from '../../domain/geofence-type.js';
 import useIamStore from '../../../iam/application/iam.store.js';
+import { useMapLoading } from '../../../shared/presentation/use-map-loading.js';
 
 // Configurar íconos de Leaflet para evitar problemas de rutas relativas con empaquetadores
 delete L.Icon.Default.prototype._getIconUrl;
@@ -21,6 +22,7 @@ const { t } = useI18n();
 const toast = useToast();
 const fleetStore = useFleetStore();
 const iamStore = useIamStore();
+const { isMapLoading, markLoaded, startFallbackTimer } = useMapLoading();
 
 // Centro por defecto: Lima, Perú (§3.5)
 const mapZoom = ref(12);
@@ -37,10 +39,10 @@ const availableSites = [
   { id: '55555555-5555-5555-5555-555555555555', name: 'Obra Puente Vía Expresa Sur', type: GeofenceType.JOB_SITE }
 ];
 
-const geofenceTypeOptions = [
-  { label: 'Almacén', value: GeofenceType.WAREHOUSE },
-  { label: 'Obra', value: GeofenceType.JOB_SITE }
-];
+const geofenceTypeOptions = computed(() => [
+  { label: t('fleet.geofences.types.WAREHOUSE'), value: GeofenceType.WAREHOUSE },
+  { label: t('fleet.geofences.types.JOB_SITE'), value: GeofenceType.JOB_SITE }
+]);
 
 const form = reactive({
   type: GeofenceType.WAREHOUSE,
@@ -208,7 +210,7 @@ const handleSubmit = async () => {
                 :options="filteredSites"
                 option-label="name"
                 option-value="id"
-                placeholder="Selecciona un predio"
+                :placeholder="t('fleet.geofences.sitePlaceholder')"
                 class="w-full"
                 :class="{ 'input-error': formErrors.siteId }"
                 @change="onSiteChange"
@@ -246,7 +248,7 @@ const handleSubmit = async () => {
                 class="w-full"
                 :class="{ 'input-error': formErrors.radius }"
               />
-              <small class="text-color-secondary block mt-1">Rango sugerido: 10 m – 5000 m</small>
+              <small class="text-color-secondary block mt-1">{{ t('fleet.geofences.radiusRangeHint') }}</small>
               <div v-if="formErrors.radius" class="error-message">{{ formErrors.radius }}</div>
             </div>
 
@@ -296,11 +298,11 @@ const handleSubmit = async () => {
                 <div>
                   <strong>{{ gf.name }}</strong>
                   <div class="text-xs text-color-secondary">
-                    Radio: {{ gf.radiusMeters }} m
+                    {{ t('fleet.geofences.radiusMeters', { radius: gf.radiusMeters }) }}
                   </div>
                 </div>
                 <pv-tag
-                  :value="gf.type === GeofenceType.WAREHOUSE ? 'Almacén' : 'Obra'"
+                  :value="t(`fleet.geofences.types.${gf.type}`)"
                   :class="gf.type === GeofenceType.WAREHOUSE ? 'tag-warehouse' : 'tag-jobsite'"
                 />
               </li>
@@ -313,12 +315,17 @@ const handleSubmit = async () => {
     <!-- Contenedor del Mapa Leaflet (§3.5) -->
     <div class="map-container">
       <div class="map-wrapper">
+        <div v-if="isMapLoading" class="vigia-map-loading-overlay" role="status" aria-live="polite">
+          <i class="pi pi-spin pi-spinner text-3xl" aria-hidden="true"></i>
+          <span>{{ t('common.loadingMap') }}</span>
+        </div>
         <l-map
           ref="map"
           v-model:zoom="mapZoom"
           :center="mapCenter"
           :use-global-leaflet="false"
           class="vigia-leaflet-map"
+          @ready="startFallbackTimer"
           @click="onMapClick"
         >
           <l-tile-layer
@@ -326,6 +333,7 @@ const handleSubmit = async () => {
             layer-type="base"
             name="OpenStreetMap"
             attribution="&copy; OpenStreetMap contributors"
+            @load="markLoaded"
           />
 
           <!-- Geocercas existentes en Azul (Almacén) y Ámbar (Obra), nunca verde ni rojo (§3.5) -->
@@ -342,8 +350,8 @@ const handleSubmit = async () => {
             <l-popup>
               <div class="popup-content">
                 <strong>{{ gf.name }}</strong><br />
-                <span>{{ gf.type === GeofenceType.WAREHOUSE ? 'Almacén' : 'Obra' }}</span><br />
-                <span>Radio: {{ gf.radiusMeters }} metros</span>
+                <span>{{ t(`fleet.geofences.types.${gf.type}`) }}</span><br />
+                <span>{{ t('fleet.geofences.radiusMeters', { radius: gf.radiusMeters }) }}</span>
               </div>
             </l-popup>
           </l-circle>
@@ -371,15 +379,15 @@ const handleSubmit = async () => {
         <div class="map-legend">
           <div class="legend-item">
             <span class="legend-color legend-blue"></span>
-            <span>Almacenes (Azul)</span>
+            <span>{{ t('fleet.geofences.legend.warehouseSummary') }}</span>
           </div>
           <div class="legend-item">
             <span class="legend-color legend-amber"></span>
-            <span>Obras (Ámbar)</span>
+            <span>{{ t('fleet.geofences.legend.jobSiteSummary') }}</span>
           </div>
           <div class="legend-item">
             <span class="legend-color legend-preview"></span>
-            <span>Vista previa</span>
+            <span>{{ t('fleet.geofences.legend.preview') }}</span>
           </div>
         </div>
       </div>
