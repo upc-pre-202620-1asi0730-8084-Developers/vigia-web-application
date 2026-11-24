@@ -1,18 +1,20 @@
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { fleetErrorMessage } from '../../domain/fleet-validation.js';
 import { useFleetStore } from '../../application/fleet.store.js';
 
 const { t } = useI18n();
 const router = useRouter();
 const fleetStore = useFleetStore();
 
-onMounted(() => {
-  fleetStore.fetchVehicles().catch(err => {
-    console.error('Error al inicializar vehículos:', err);
-  });
-});
+const loadError = ref(null);
+async function loadVehicles() {
+  loadError.value = null;
+  try { await fleetStore.fetchVehicles(); } catch (error) { loadError.value = error; }
+}
+onMounted(loadVehicles);
 
 const vehicles = computed(() => fleetStore.vehicles);
 
@@ -25,6 +27,10 @@ const goToPair = (vehicle) => router.push({ name: 'vehicle-pair-device', params:
 
 <template>
   <div class="vehicles-view">
+    <div v-if="loadError" role="alert" class="error-message">
+      {{ fleetErrorMessage(loadError,t) }}
+      <pv-button :label="t('fleet.errors.retry')" @click="loadVehicles" />
+    </div>
     <div class="actions-bar mb-4">
       <!-- Botón de acción principal: Ámbar (#F5A623), texto #212121, hover #3D6B94 (§3.2, §3.5) -->
       <pv-button
@@ -36,7 +42,7 @@ const goToPair = (vehicle) => router.push({ name: 'vehicle-pair-device', params:
     </div>
 
     <!-- Estado vacío -->
-    <div v-if="!fleetStore.loadingVehicles && vehicles.length === 0" class="empty-state">
+    <div v-if="!loadError && !fleetStore.loadingVehicles && vehicles.length === 0" class="empty-state">
       <pv-card>
         <template #content>
           <div class="text-center p-4">
@@ -48,7 +54,7 @@ const goToPair = (vehicle) => router.push({ name: 'vehicle-pair-device', params:
     </div>
 
     <!-- Tabla Desktop (>768px, §3.5) -->
-    <div v-else class="desktop-table-container">
+    <div v-else-if="!loadError" class="desktop-table-container">
       <pv-data-table
         :value="vehicles"
         :loading="fleetStore.loadingVehicles"

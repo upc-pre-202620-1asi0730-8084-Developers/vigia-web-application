@@ -7,6 +7,7 @@ import TransitTrackingView from '../../../transit-traceability/presentation/view
 
 const { t } = useI18n();
 const activeTab = ref('vehicles');
+const savingGeofence = ref(false);
 </script>
 
 <template>
@@ -22,18 +23,21 @@ const activeTab = ref('vehicles');
         :label="t('fleet.tabs.vehicles')"
         icon="pi pi-truck"
         :class="activeTab === 'vehicles' ? 'btn-primary' : 'btn-secondary'"
+        :disabled="savingGeofence"
         @click="activeTab = 'vehicles'"
       />
       <pv-button
         :label="t('fleet.tabs.geofences')"
         icon="pi pi-map"
         :class="activeTab === 'geofences' ? 'btn-primary' : 'btn-secondary'"
+        :disabled="savingGeofence"
         @click="activeTab = 'geofences'"
       />
       <pv-button
         :label="t('fleet.tabs.tracking')"
         icon="pi pi-map-marker"
         :class="activeTab === 'tracking' ? 'btn-primary' : 'btn-secondary'"
+        :disabled="savingGeofence"
         @click="activeTab = 'tracking'"
       />
     </div>
@@ -44,8 +48,8 @@ const activeTab = ref('vehicles');
     </div>
 
     <!-- Pestaña 2: Geocercas de Predios (US-19) -->
-    <div v-show="activeTab === 'geofences'" class="tab-content">
-      <GeofenceView />
+    <div v-if="activeTab === 'geofences'" class="tab-content">
+      <GeofenceView @busy="savingGeofence = $event" />
     </div>
 
     <!-- Pestaña 3: Seguimiento en tránsito (BC-06 Transit Traceability); v-if para que Leaflet mida el mapa visible -->

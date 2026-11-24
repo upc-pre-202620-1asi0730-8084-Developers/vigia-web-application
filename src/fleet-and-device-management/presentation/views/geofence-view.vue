@@ -1,5 +1,7 @@
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
+import { validGeofenceRadius, fleetErrorMessage } from '../../domain/fleet-validation.js';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue';
 import 'leaflet/dist/leaflet.css';
@@ -30,15 +32,13 @@ const mapCenter = ref([-12.0464, -77.0428]);
 const selectedCenter = ref(null);
 const isSubmitting = ref(false);
 
-// Predios de prueba disponibles en el sistema según tipo (§4.6.1)
-const availableSites = [
-  { id: '11111111-1111-1111-1111-111111111111', name: 'Almacén Central Lurín', type: GeofenceType.WAREHOUSE },
-  { id: '33333333-3333-3333-3333-333333333333', name: 'Almacén Callao - Base Logística', type: GeofenceType.WAREHOUSE },
-  { id: '22222222-2222-2222-2222-222222222222', name: 'Obra Torres de San Isidro', type: GeofenceType.JOB_SITE },
-  { id: '44444444-4444-4444-4444-444444444444', name: 'Obra Condominio Las Palmas - Surco', type: GeofenceType.JOB_SITE },
-  { id: '55555555-5555-5555-5555-555555555555', name: 'Obra Puente Vía Expresa Sur', type: GeofenceType.JOB_SITE }
-];
-
+const projects = ref([]);
+const loading = ref(false);
+const loadError = ref(null);
+const submitError = ref(null);
+const emit = defineEmits(['busy']);
+watch(isSubmitting, value => emit('busy', value));
+onBeforeRouteLeave(() => !isSubmitting.value);
 const geofenceTypeOptions = computed(() => [
   { label: t('fleet.geofences.types.WAREHOUSE'), value: GeofenceType.WAREHOUSE },
   { label: t('fleet.geofences.types.JOB_SITE'), value: GeofenceType.JOB_SITE }
@@ -59,18 +59,18 @@ const formErrors = reactive({
   general: ''
 });
 
-onMounted(() => {
-  fleetStore.fetchGeofences().catch(err => {
-    console.error('Error al inicializar geocercas:', err);
-  });
-});
-
+async function loadData() {
+  if (loading.value || isSubmitting.value) return;
+  loading.value = true; loadError.value = null;
+  const results = await Promise.allSettled([fleetStore.fetchGeofences(), fleetStore.fetchProjects()]);
+  if (results[1].status === 'fulfilled') projects.value = results[1].value;
+  const failed = results.find(result => result.status === 'rejected');
+  loadError.value = failed?.reason || null;
+  loading.value = false;
+}
+onMounted(loadData);
 const existingGeofences = computed(() => fleetStore.geofences);
-
-// Filtrar predios según el tipo seleccionado
-const filteredSites = computed(() => {
-  return availableSites.filter(site => site.type === form.type);
-});
+const filteredSites = computed(() => projects.value.map(project => ({id:String(project.id),name:project.name})));
 
 // Validación reactiva del formulario
 const isFormValid = computed(() => {
@@ -79,14 +79,13 @@ const isFormValid = computed(() => {
     form.siteId &&
     form.name.trim().length > 0 &&
     selectedCenter.value !== null &&
-    form.radiusMeters >= 10 &&
-    form.radiusMeters <= 5000
+    validGeofenceRadius(form.radiusMeters) && !loading.value && !loadError.value && form.name.trim().length <= 150 && form.siteId.trim().length <= 64
   );
 });
 
 // Manejador de clic en el mapa para fijar el centro (§3.5)
 const onMapClick = (event) => {
-  if (event && event.latlng) {
+  if (!isSubmitting.value && event && event.latlng) {
     selectedCenter.value = {
       latitude: Number(event.latlng.lat.toFixed(6)),
       longitude: Number(event.latlng.lng.toFixed(6))
@@ -98,14 +97,16 @@ const onMapClick = (event) => {
 // Autocompletar nombre al seleccionar predio si está vacío
 const onSiteChange = (event) => {
   formErrors.siteId = '';
-  const selected = availableSites.find(s => s.id === event.value);
+  const selected = filteredSites.value.find(s => s.id === event.value);
   if (selected && !form.name) {
-    form.name = `Geocerca ${selected.name}`;
+    form.name = t('fleet.geofences.defaultName', {name:selected.name});
   }
 };
 
 // Enviar formulario para definir la geocerca
 const handleSubmit = async () => {
+  if (isSubmitting.value || loading.value || loadError.value) return;
+  submitError.value = null;
   formErrors.siteId = '';
   formErrors.name = '';
   formErrors.radius = '';
@@ -124,21 +125,16 @@ const handleSubmit = async () => {
     formErrors.center = t('fleet.errors.centerRequired');
     return;
   }
-  if (form.radiusMeters < 10 || form.radiusMeters > 5000) {
+  if (!validGeofenceRadius(form.radiusMeters)) {
     formErrors.radius = t('fleet.errors.radiusInvalid');
     return;
   }
 
+  if (form.name.trim().length > 150 || form.siteId.trim().length > 64) { submitError.value = {status:400}; return; }
+  const payload = {companyId:iamStore.companyId,siteId:form.siteId.trim(),name:form.name.trim(),type:form.type,centerPoint:{...selectedCenter.value},radiusMeters:form.radiusMeters};
   isSubmitting.value = true;
   try {
-    const created = await fleetStore.defineGeofence({
-      companyId: iamStore.companyId,
-      siteId: form.siteId,
-      name: form.name.trim(),
-      type: form.type,
-      centerPoint: selectedCenter.value,
-      radiusMeters: form.radiusMeters
-    });
+    const created = await fleetStore.defineGeofence(payload);
 
     // Toast de éxito específico según el tipo (§3.3)
     const successToast = form.type === GeofenceType.WAREHOUSE
@@ -156,14 +152,7 @@ const handleSubmit = async () => {
     form.siteId = '';
     form.name = '';
     selectedCenter.value = null;
-  } catch (error) {
-    if (error.code === 'SITE_ALREADY_HAS_GEOFENCE' || error.status === 409) {
-      formErrors.siteId = t('fleet.errors.siteAlreadyHasGeofence');
-    } else if (error.status === 0) {
-      formErrors.general = t('fleet.errors.networkError');
-    } else {
-      formErrors.general = error.message || t('fleet.errors.networkError');
-    }
+  } catch (error) { submitError.value = error;
   } finally {
     isSubmitting.value = false;
   }
@@ -182,7 +171,11 @@ const handleSubmit = async () => {
           </div>
         </template>
         <template #content>
+          <div v-if="loadError" role="alert" class="error-message">{{ fleetErrorMessage(loadError,t) }}</div>
+          <p v-if="loading" role="status">{{ t('common.loading') }}</p>
+          <pv-button v-if="loadError" :label="t('fleet.errors.retry')" @click="loadData" />
           <form @submit.prevent="handleSubmit" class="geofence-form">
+          <fieldset :disabled="isSubmitting || loading || !!loadError" style="border:0;padding:0;margin:0;min-width:0">
             <!-- Tipo de Predio (Almacén / Obra) -->
             <div class="form-field mb-3">
               <label for="type-select" class="field-label font-bold mb-1 block">
@@ -205,6 +198,7 @@ const handleSubmit = async () => {
                 {{ t('fleet.geofences.siteLabel') }} *
               </label>
               <pv-select
+                v-if="form.type === GeofenceType.JOB_SITE"
                 id="site-select"
                 v-model="form.siteId"
                 :options="filteredSites"
@@ -215,6 +209,9 @@ const handleSubmit = async () => {
                 :class="{ 'input-error': formErrors.siteId }"
                 @change="onSiteChange"
               />
+              <pv-input-text v-else id="site-select" v-model="form.siteId" maxlength="64" :placeholder="t('fleet.geofences.warehouseCode')" class="w-full" />
+              <small class="block mt-1" v-if="form.type === GeofenceType.WAREHOUSE">{{ t('fleet.geofences.warehouseCodeHint') }}</small>
+              <small v-if="form.type === GeofenceType.JOB_SITE && !loading && !filteredSites.length">{{ t('fleet.geofences.noProjects') }}</small>
               <div v-if="formErrors.siteId" class="error-message">{{ formErrors.siteId }}</div>
             </div>
 
@@ -225,7 +222,7 @@ const handleSubmit = async () => {
               </label>
               <pv-input-text
                 id="name-input"
-                v-model="form.name"
+                v-model="form.name" maxlength="150"
                 :placeholder="t('fleet.geofences.namePlaceholder')"
                 class="w-full"
                 :class="{ 'input-error': formErrors.name }"
@@ -233,7 +230,7 @@ const handleSubmit = async () => {
               <div v-if="formErrors.name" class="error-message">{{ formErrors.name }}</div>
             </div>
 
-            <!-- Radio en Metros (10 a 5000 m) -->
+            <!-- Radio en Metros (10 a 50000 m) -->
             <div class="form-field mb-3">
               <label for="radius-input" class="field-label font-bold mb-1 block">
                 {{ t('fleet.geofences.radiusLabel') }} *
@@ -242,7 +239,7 @@ const handleSubmit = async () => {
                 id="radius-input"
                 v-model="form.radiusMeters"
                 :min="10"
-                :max="5000"
+                :max="50000"
                 :step="25"
                 suffix=" m"
                 class="w-full"
@@ -265,6 +262,7 @@ const handleSubmit = async () => {
               <div v-if="formErrors.center" class="error-message mt-2">{{ formErrors.center }}</div>
             </div>
 
+            <div v-if="submitError" class="error-message" role="alert">{{ fleetErrorMessage(submitError,t) }}</div>
             <div v-if="formErrors.general" class="error-message mb-3">{{ formErrors.general }}</div>
 
             <!-- Botón de acción: Ámbar, deshabilitado hasta que haya datos válidos (§3.2, §3.5) -->
@@ -278,6 +276,7 @@ const handleSubmit = async () => {
                 :loading="isSubmitting"
               />
             </div>
+          </fieldset>
           </form>
         </template>
       </pv-card>

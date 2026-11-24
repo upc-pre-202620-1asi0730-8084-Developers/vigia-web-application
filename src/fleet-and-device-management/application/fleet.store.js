@@ -36,6 +36,19 @@ export const useFleetStore = defineStore('fleet', () => {
         }
     }
 
+    function upsertVehicle(vehicle) {
+        const index = vehicles.value.findIndex(v => String(v.id) === String(vehicle.id));
+        if (index < 0) vehicles.value.push(vehicle); else vehicles.value[index] = vehicle;
+        return vehicle;
+    }
+
+    async function fetchVehicleById(id) {
+        const response = await fleetApi.getVehicleById(id);
+        return upsertVehicle(VehicleAssembler.toEntityFromResource(response.data));
+    }
+
+    async function fetchProjects() { return (await fleetApi.getProjects()).data; }
+
     /**
      * Registra una unidad de transporte y, si se indica un dispositivo GPS, intenta vincularlo (§3.5).
      * Si la vinculación GPS falla con 409, la unidad permanece registrada y se reporta el error del dispositivo.
@@ -50,9 +63,19 @@ export const useFleetStore = defineStore('fleet', () => {
         });
 
         // 1. Registrar unidad
-        const response = await fleetApi.createVehicle(payload);
-        const registeredVehicle = VehicleAssembler.toEntityFromResource(response.data);
-        vehicles.value.push(registeredVehicle);
+        let registeredVehicle;
+        try {
+            registeredVehicle = VehicleAssembler.toEntityFromResource((await fleetApi.createVehicle(payload)).data);
+        } catch (error) {
+            if (error.status !== 0 && error.status < 500) throw error;
+            try {
+                const rows = VehicleAssembler.toEntitiesFromResponse(await fleetApi.getVehicles());
+                registeredVehicle = rows.find(v => v.licensePlate === payload.licensePlate && v.companyId === payload.companyId &&
+                    v.brand === payload.brand && v.model === payload.model && v.maxCapacityTons === payload.maxCapacityTons);
+            } catch { /* Keep the original uncertain write result. */ }
+            if (!registeredVehicle) throw error;
+        }
+        upsertVehicle(registeredVehicle);
 
         let pairingError = null;
 
@@ -75,9 +98,15 @@ export const useFleetStore = defineStore('fleet', () => {
      * @param {string} gpsDeviceId
      */
     async function pairDevice(vehicleId, gpsDeviceId) {
-        const response = await fleetApi.pairGpsDevice(vehicleId, gpsDeviceId);
-        const updatedResource = response.data;
-        const updatedEntity = VehicleAssembler.toEntityFromResource(updatedResource);
+        let updatedEntity;
+        try {
+            updatedEntity = VehicleAssembler.toEntityFromResource((await fleetApi.pairGpsDevice(vehicleId, gpsDeviceId)).data);
+        } catch (error) {
+            if (error.status !== 0 && error.status < 500) throw error;
+            const current = await fetchVehicleById(vehicleId).catch(() => null);
+            if (current?.gpsDeviceId !== gpsDeviceId.trim().toUpperCase()) throw error;
+            return current;
+        }
 
         const index = vehicles.value.findIndex(v => String(v.id) === String(vehicleId));
         if (index !== -1) {
@@ -124,6 +153,8 @@ export const useFleetStore = defineStore('fleet', () => {
         vehiclesCount,
         geofencesCount,
         fetchVehicles,
+        fetchVehicleById,
+        fetchProjects,
         registerVehicle,
         pairDevice,
         fetchGeofences,

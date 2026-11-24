@@ -1,82 +1,70 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router';
 import { useToast } from 'primevue';
 import { useFleetStore } from '../../application/fleet.store.js';
-
-/**
- * Page to pair a GPS device with a registered transport unit (US-18).
- * Route: /transporte/unidades/:id/gps
- */
+import { fleetErrorMessage } from '../../domain/fleet-validation.js';
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const fleetStore = useFleetStore();
-
 const isPairing = ref(false);
+const loading = ref(false);
+const targetVehicle = ref(null);
 const deviceId = ref('');
-const pairErrors = ref({ deviceId: '', general: '' });
-
-const targetVehicle = computed(() => fleetStore.vehicles.find(v => String(v.id) === String(route.params.id)) ?? null);
-
-onMounted(() => {
-  if (!fleetStore.vehicles.length) {
-    fleetStore.fetchVehicles().catch(error => { pairErrors.value.general = error.message; });
-  }
+const failure = ref(null);
+const validation = ref('');
+const pairErrors = computed(() => {
+  const message = validation.value ? t(`fleet.errors.${validation.value}`) : fleetErrorMessage(failure.value,t);
+  const deviceError = !!validation.value || ['FLEET_DEVICE_ALREADY_ASSIGNED','FLEET_INVALID_GPS_DEVICE'].includes(failure.value?.code);
+  return {deviceId:deviceError ? message : '',general:deviceError ? '' : message};
 });
-
-// Precarga el dispositivo actual cuando la unidad está disponible
-watch(targetVehicle, vehicle => { if (vehicle && !deviceId.value) deviceId.value = vehicle.gpsDeviceId || ''; }, { immediate: true });
-
-const goBack = () => router.push('/transporte');
-
-// Vincular dispositivo GPS
+let loadVersion = 0;
+async function loadVehicle() {
+  const version = ++loadVersion;
+  loading.value = true; targetVehicle.value = null; failure.value = null; deviceId.value = ''; validation.value = '';
+  try {
+    if (!/^[1-9]\d*$/.test(String(route.params.id))) throw {status:404};
+    const vehicle = await fleetStore.fetchVehicleById(route.params.id);
+    if (version === loadVersion) { targetVehicle.value = vehicle; deviceId.value = vehicle.gpsDeviceId || ''; }
+  } catch (error) { if (version === loadVersion) failure.value = error; }
+  finally { if (version === loadVersion) loading.value = false; }
+}
+watch(() => route.params.id, loadVehicle, {immediate:true});
+onBeforeRouteLeave(() => !isPairing.value);
+onBeforeRouteUpdate(() => !isPairing.value);
+const goBack = () => { if (!isPairing.value) router.push('/transporte'); };
 const handlePair = async () => {
-  pairErrors.value = { deviceId: '', general: '' };
-  const trimmed = deviceId.value.trim();
-
-  if (!trimmed) {
-    pairErrors.value.deviceId = t('fleet.errors.deviceRequired');
-    return;
-  }
-
+  if (isPairing.value || loading.value || !targetVehicle.value) return;
+  validation.value = ''; failure.value = null;
+  const trimmed = deviceId.value.trim().toUpperCase();
+  if (!trimmed || trimmed.length > 64 || /\p{Cc}/u.test(trimmed)) { validation.value = 'deviceInvalid'; return; }
+  const vehicle = targetVehicle.value;
   isPairing.value = true;
   try {
-    await fleetStore.pairDevice(targetVehicle.value.id, trimmed);
-    toast.add({
-      severity: 'success',
-      summary: t('fleet.vehicles.pairedToast'),
-      detail: `${trimmed} → ${targetVehicle.value.licensePlate}`,
-      life: 3000
-    });
-    goBack();
-  } catch (error) {
-    if (error.code === 'DEVICE_ALREADY_ASSIGNED' || error.status === 409) {
-      pairErrors.value.deviceId = t('fleet.errors.deviceAlreadyAssigned', {
-        deviceId: trimmed,
-        plate: error.assignedLicensePlate || 'otra unidad'
-      });
-    } else if (error.status === 0) {
-      pairErrors.value.general = t('fleet.errors.networkError');
-    } else {
-      pairErrors.value.general = error.message;
-    }
-  } finally {
+    const updated = await fleetStore.pairDevice(vehicle.id, trimmed);
+    targetVehicle.value = updated;
+    toast.add({severity:'success', summary:t('fleet.vehicles.pairedToast'), detail:`${trimmed} / ${updated.licensePlate}`, life:5000});
     isPairing.value = false;
-  }
+    await router.push('/transporte');
+  } catch (error) { failure.value = {...error, deviceId:trimmed}; }
+  finally { isPairing.value = false; }
 };
 </script>
 
 <template>
   <div class="p-4">
     <div class="page-header">
-      <pv-button :label="t('fleet.title')" icon="pi pi-arrow-left" link class="back-link" @click="goBack" />
+      <pv-button :label="t('fleet.title')" icon="pi pi-arrow-left" link class="back-link" :disabled="isPairing" @click="goBack" />
       <h1 class="m-0">{{ t('fleet.vehicles.dialog.pairTitle') }}</h1>
     </div>
 
+    <p v-if="loading" role="status">{{ t('common.loading') }}</p>
+    <pv-button v-if="!loading && !targetVehicle" :label="t('fleet.errors.retry')" @click="loadVehicle" />
     <form class="vigia-card page-form" novalidate @submit.prevent="handlePair">
+      <fieldset :disabled="isPairing || loading || !targetVehicle" style="border:0;padding:0;margin:0">
       <div v-if="targetVehicle" class="vehicle-summary mb-3">
         <i class="pi pi-truck" aria-hidden="true" />
         <div>
@@ -89,16 +77,16 @@ const handlePair = async () => {
         <label for="pair-gps-input" class="field-label">{{ t('fleet.vehicles.dialog.gpsDeviceLabel') }} *</label>
         <pv-input-text
             id="pair-gps-input"
-            v-model="deviceId"
+            v-model="deviceId" maxlength="64"
             placeholder="Ej. GPS-TR-105"
             :invalid="!!pairErrors.deviceId"
             :disabled="!targetVehicle"
         />
         <!-- 409 se muestra en línea con borde rojo (§3.5) -->
-        <div v-if="pairErrors.deviceId" class="error-message">{{ pairErrors.deviceId }}</div>
+        <div v-if="pairErrors.deviceId" class="error-message" role="alert">{{ pairErrors.deviceId }}</div>
       </div>
 
-      <div v-if="pairErrors.general" class="error-message mt-3">{{ pairErrors.general }}</div>
+      <div v-if="pairErrors.general" class="error-message mt-3" role="alert">{{ pairErrors.general }}</div>
 
       <div class="form-footer">
         <pv-button type="button" :label="t('fleet.vehicles.dialog.cancel')" class="btn-secondary" @click="goBack" />
@@ -111,6 +99,7 @@ const handlePair = async () => {
             :disabled="isPairing || !targetVehicle"
         />
       </div>
+    </fieldset>
     </form>
   </div>
 </template>

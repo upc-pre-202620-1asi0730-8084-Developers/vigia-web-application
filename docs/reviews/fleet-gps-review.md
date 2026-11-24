@@ -12,3 +12,7 @@ Reviewed on 2026-11-24 for schedule row 9 and US-18. Frontend baseline: `0936957
 - Coordinate the displayed position after GPS replacement with the telemetry review; the API currently retains the previous device's position.
 
 These interface findings came from code inspection. Row 9 did not execute a new browser acceptance test. Backend HTTP verification used isolated local data: 29 principal checks, five diagnostic requests and a seven-request concurrent scenario. Concurrent GPS assignment yielded one `200`, one `409` and one owner. No cloud deployment occurred. US-18 remains partial pending implementation and integrated acceptance.
+
+## Row 11 implementation
+
+The reviewed interface defects are addressed by fresh vehicle reads, bounded requests, guarded submissions, structured localized conflicts, server-confirmed recovery of uncertain vehicle/GPS writes, and real project selection. Warehouse geofences use an explicit code/name, and radius limits match the API. Local UI verification covers registration with an occupied GPS, the actual owning plate in both languages, successful pairing, real project selection, duplicate geofence rejection and persistence after reload. Device timestamp ordering and active route integration remain in row 12.
