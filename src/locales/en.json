@@ -747,9 +747,20 @@
       "observations": "Site Observations",
       "observationsPlaceholder": "Note any detail about unloading or material condition...",
       "saveAction": "Confirm and register",
-      "requiredFields": "Please fill in the dispatch ID and delivery guide number.",
+      "requiredFields": "Select an incoming dispatch with an issued delivery guide.",
+      "noUpcomingArrivals": "There are no in-transit dispatches assigned to your job sites pending reception.",
+      "lockedGuideHelp": "Dispatch and delivery guide details are issued by the server and cannot be altered.",
       "errorSaving": "An error occurred while saving the reception.",
       "saved": "Reception registered"
+    },
+    "errors": {
+      "forbidden": "You do not have permission to access or modify this project reception.",
+      "notFound": "The requested reception was not found or is not assigned to your job sites.",
+      "invalidGuide": "The delivery guide number does not match the server-issued guide for this dispatch.",
+      "duplicateReception": "This dispatch already has a registered reception. Reload to check its status.",
+      "conflict": "The reception changed concurrently or was already closed. Reload before retrying.",
+      "validation": "Verify the received quantities and required fields before continuing.",
+      "networkUncertain": "No confirmation from the server. Your request is preserved so you can retry safely without duplicating records."
     },
     "discrepancy": {
       "title": "Report Reception Discrepancy",
@@ -1102,6 +1113,8 @@
     "reload": "Refresh reception",
     "missing": "Could not load this reception for your account.",
     "reported": "Discrepancy reported.",
+    "uncertainReport": "Confirmation was not received. Your request is preserved so you can retry safely without duplicating the case.",
+    "viewCase": "View linked case",
     "back": "Back to receptions"
   }
 }

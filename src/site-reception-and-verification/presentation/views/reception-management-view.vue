@@ -7,6 +7,12 @@ import { useReceptionStore } from '../../application/reception.store.js';
 import useIamStore from '../../../iam/application/iam.store.js';
 import { ROLES } from '../../../shared/presentation/navigation.config.js';
 import { formatCurrentDate } from '../../../shared/presentation/formatters.js';
+import {
+  clearPendingReceptionRequest,
+  mapReceptionErrorKey,
+  readPendingReceptionRequest,
+  savePendingReceptionRequest
+} from '../../domain/reception-verification.js';
 
 import SiteManagerReceptionView from '../components/site-manager-reception-view.vue';
 import SupervisorReceptionView from '../components/supervisor-reception-view.vue';
@@ -94,14 +100,32 @@ function openGalleryDialog(reception) {
 }
 
 async function handleConfirmReception(reception) {
+  const storage = typeof sessionStorage !== 'undefined' ? sessionStorage : null;
+  const key = `vigia.reception.verify.${iamStore.currentUserId}.${reception.id}`;
+  const pending = readPendingReceptionRequest(storage, key);
+  const requestId = pending?.action === 'verify-conformant' ? pending.requestId : crypto.randomUUID();
+  savePendingReceptionRequest(storage, key, {
+    requestId,
+    action: 'verify-conformant',
+    dispatchId: String(reception.dispatchId || ''),
+    guideNumber: String(reception.deliveryGuideNumber || '')
+  });
+
   try {
     await receptionStore.verifyReception(reception.id, {
       status: reception.hasDiscrepancy ? 'VERIFIED_DISCREPANT' : 'VERIFIED_CONFORMANT',
+      requestId,
       closedAt: new Date().toISOString()
     });
+    clearPendingReceptionRequest(storage, key);
     toast.add({severity: 'success', summary: t('receptions.dialog.saved'), life: 3000});
   } catch (err) {
-    toast.add({severity: 'error', summary: t('errors.occurred'), detail: err.message, life: 4000});
+    const status = Number(err?.status ?? 0);
+    if (status >= 400 && status < 500) {
+      clearPendingReceptionRequest(storage, key);
+      await Promise.allSettled([receptionStore.fetchReceptions(), receptionStore.fetchUpcomingArrivals()]);
+    }
+    toast.add({severity: 'error', summary: t('errors.occurred'), detail: t(mapReceptionErrorKey(err)), life: 4000});
   }
 }
 </script>
