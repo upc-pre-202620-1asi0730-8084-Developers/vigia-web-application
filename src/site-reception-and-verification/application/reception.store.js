@@ -201,36 +201,21 @@ export const useReceptionStore = defineStore('reception', () => {
     /**
      * Registra un reporte de discrepancia con evidencia fotográfica (US-10).
      * @param {string|number} receptionId
-     * @param {Object} payload - { observations, evidence }
+     * @param {Object} payload - { observations, evidence, requestId }
      */
-    async function reportDiscrepancy(receptionId, { observations, evidence }) {
-        let updatedEntity = null;
-
-        if (evidence && (evidence.evidenceUrl || evidence.caption)) {
-            const evRes = await receptionApi.addEvidence(receptionId, evidence);
-            updatedEntity = ReceptionAssembler.toEntityFromResource(evRes.data);
-        }
-
-        const verifyRes = await receptionApi.verifyReception(receptionId, {
+    async function reportDiscrepancy(receptionId, { observations, evidence, requestId = null }) {
+        const hasPhotographicEvidence = Boolean(
+            evidence || receptions.value.find(r => String(r.id) === String(receptionId))?.evidences?.length
+        );
+        return await verifyReception(receptionId, {
             status: RECEPTION_STATUS.VERIFIED_DISCREPANT,
-            observations: observations,
+            requestId,
+            observations,
             checklist: {
-                ...receptions.value.find(r => String(r.id) === String(receptionId))?.checklist,
                 observationsRecorded: true,
-                photographicEvidence: Boolean(evidence)
+                photographicEvidence: hasPhotographicEvidence
             }
         });
-
-        updatedEntity = ReceptionAssembler.toEntityFromResource(verifyRes.data);
-
-        const index = receptions.value.findIndex(r => String(r.id) === String(receptionId));
-        if (index !== -1) {
-            receptions.value[index] = updatedEntity;
-        }
-        if (selectedReception.value && String(selectedReception.value.id) === String(receptionId)) {
-            selectedReception.value = updatedEntity;
-        }
-        return updatedEntity;
     }
 
     /**

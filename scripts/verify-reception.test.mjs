@@ -81,3 +81,23 @@ test('reception assembler preserves requestId, verifiedByUserId, siteId and cano
     const dto = ReceptionAssembler.toResourceFromEntity({ ...entity, requestId: REQUEST_UUID });
     assert.equal(dto.requestId, REQUEST_UUID);
 });
+
+test('discrepancy verification request persistence retains verify-discrepant UUID across reload', () => {
+    const map = new Map();
+    const storage = {
+        getItem: k => (map.has(k) ? map.get(k) : null),
+        setItem: (k, v) => map.set(k, String(v)),
+        removeItem: k => map.delete(k)
+    };
+    const key = 'vigia.reception.verify.101.7';
+    savePendingReceptionRequest(storage, key, {
+        requestId: REQUEST_UUID,
+        action: 'verify-discrepant',
+        dispatchId: '12',
+        guideNumber: 'GD-00000012'
+    });
+    const pending = readPendingReceptionRequest(storage, key);
+    assert.equal(pending?.action, 'verify-discrepant');
+    assert.equal(pending?.requestId, REQUEST_UUID);
+});
+

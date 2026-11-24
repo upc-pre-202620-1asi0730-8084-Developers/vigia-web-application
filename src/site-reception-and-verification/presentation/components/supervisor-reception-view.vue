@@ -5,6 +5,7 @@ import { useReceptionStore } from '../../application/reception.store.js';
 import { RECEPTION_STATUS } from '../../domain/reception-status.js';
 import { canActorEditReception } from '../../domain/reception-verification.js';
 import useIamStore from '../../../iam/application/iam.store.js';
+import ProtectedEvidencePhoto from '../../../discrepancy-and-evidence-management/presentation/components/protected-evidence-photo.vue';
 
 const emit = defineEmits(['reportDiscrepancy', 'confirmReception', 'viewGallery']);
 
@@ -370,13 +371,14 @@ function getStatusLabel(status) {
             </a>
           </div>
           <div class="flex gap-2">
-            <img
+            <div
               v-for="ev in selectedItem.evidences.slice(0, 3)"
               :key="ev.id"
-              :src="ev.evidenceUrl"
-              class="thumb-img border-round cursor-pointer"
+              class="thumb-img border-round overflow-hidden cursor-pointer"
               @click="emit('viewGallery', selectedItem)"
-            />
+            >
+              <ProtectedEvidencePhoto :url="ev.evidenceUrl" :reception-id="selectedItem.id" :caption="ev.caption" />
+            </div>
           </div>
         </div>
 
@@ -712,8 +714,19 @@ function getStatusLabel(status) {
 .thumb-img {
   width: 60px;
   height: 48px;
-  object-fit: cover;
   border: 1px solid #E5E7EB;
+  background-color: #F8FAFC;
+}
+
+.thumb-img :deep(.protected-photo img) {
+  width: 60px;
+  height: 48px;
+  object-fit: cover;
+}
+
+.thumb-img :deep(.protected-photo a),
+.thumb-img :deep(.protected-photo p) {
+  display: none;
 }
 
 @media (max-width: 1024px) {
