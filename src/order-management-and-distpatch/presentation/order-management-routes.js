@@ -10,6 +10,7 @@ const roles = [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER];
 const orderRoles = [...roles, ROLES.SITE_MANAGER];
 
 const orderManagementRoutes = [
+    {path:'/despachos/:id/salida',name:'ordering-dispatch-departure',component:()=>import('../../transit-traceability/presentation/views/dispatch-departure.vue'),meta:{title:'Inicio de traslado',roles}},
     {   path: '/despachos/:id/guia', name: 'ordering-dispatch-guide', component: () => import('./views/dispatch-guide.vue'), meta: {title: 'Guía de despacho', roles}},
     {   path: '/despachos/:id/pesaje', name: 'ordering-dispatch-weighing', component: () => import('./views/dispatch-weighing.vue'), meta: {title: 'Pesaje', roles}},
     {   path: '/solicitudes',       name: 'ordering-orders',        component: orderList,      meta: {title: 'Solicitudes', roles: orderRoles}},

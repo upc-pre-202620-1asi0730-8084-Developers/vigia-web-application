@@ -115,8 +115,10 @@ export const useReceptionStore = defineStore('reception', () => {
         try {
             const response = await receptionApi.getUpcomingArrivals();
             upcomingArrivals.value = response.data || [];
+            return true;
         } catch (error) {
             errors.value.push(error);
+            return false;
         } finally {
             loadingArrivals.value = false;
         }

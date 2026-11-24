@@ -1,12 +1,13 @@
 <script setup>
 import { ref } from 'vue';
+import {useRoute} from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import VehicleListView from './vehicle-list-view.vue';
 import GeofenceView from './geofence-view.vue';
 import TransitTrackingView from '../../../transit-traceability/presentation/views/transit-tracking-view.vue';
 
 const { t } = useI18n();
-const activeTab = ref('vehicles');
+const activeTab = ref(useRoute().query.route ? 'tracking' : 'vehicles');
 const savingGeofence = ref(false);
 </script>
 
