@@ -969,6 +969,27 @@
     "difference": "Net − expected difference", "operator": "Recorded by", "date": "Date and time",
     "comparison": {"NOT_EVALUATED": "Not evaluated", "WITHIN_TOLERANCE": "Within tolerance", "OUTSIDE_TOLERANCE": "Outside tolerance"}
   },
+  "guide": {
+    "title":"Dispatch guide", "open":"View guide and authorization", "notIssued":"Guide not issued",
+    "description":"The warehouse confirms the load, weighing and carrier before authorizing the dispatch.",
+    "authorized":"Dispatch authorized", "notAuthorized":"No current dispatch authorization",
+    "issue":"Issue guide and authorize", "driver":"Driver", "carrier":"Carrier or company",
+    "requirements":"An in-preparation dispatch, assigned vehicle and current weighing within tolerance are required. Check the weighing before continuing.",
+    "confirmation":"Confirming saves the materials, vehicle and weighing in the guide. To correct them afterwards, cancel the dispatch and prepare a new one.",
+    "locked":"The issued guide preserves the load, vehicle and weighing; these values can no longer be changed on this dispatch.",
+    "issued":"Guide issued and dispatch authorized. Departure must still be recorded when the vehicle leaves the warehouse.",
+    "depart":"Confirm warehouse departure", "departHint":"Confirm only when the vehicle is leaving. The dispatch will move to In transit.",
+    "departed":"Departure recorded. The dispatch is in transit.", "destination":"Destination", "issuedBy":"Issued by", "issuedAt":"Issue date",
+    "loading":"Loading dispatch and guide…", "missing":"The dispatch does not exist.",
+    "loadError":"Data could not be refreshed. If issuance was already confirmed, the guide remains saved; refresh to view it.",
+    "invalid":"Enter driver and carrier names, up to 150 characters and without line breaks.",
+    "saveError":"The guide could not be issued. Refresh the dispatch and check the values before continuing.",
+    "conflict":"The dispatch changed, already has a guide or does not meet the requirements. Review the refreshed data.",
+    "pending":"A guide issuance is awaiting confirmation. Its exact details are retained to retry without duplicating the guide.",
+    "retry":"Retry the same issuance", "uncertain":"The response could not be confirmed. Retry the same issuance to check or complete that operation.",
+    "storageError":"Enable browser session storage to retain the submission identifier.",
+    "departureError":"Departure could not be confirmed. Review the refreshed status before repeating the action."
+  },
   "errors": {
     "occurred": "Errors occurred"
   }

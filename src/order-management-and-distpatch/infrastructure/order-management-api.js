@@ -103,11 +103,15 @@ export class OrderManagementApi extends BaseApi {
      * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to the dispatch response.
      */
     getDispatchById(id) {
-        return this.#dispatchesEndpoint.getById(id);
+        return this.http.get(`${dispatchesEndpointPath}/${id}`, {timeout: 15000});
     }
 
     getDispatchWeighings(id) {
         return this.http.get(`${dispatchesEndpointPath}/${id}/weighing`);
+    }
+
+    issueDeliveryGuide(id, details) {
+        return this.http.post(`${dispatchesEndpointPath}/${id}/delivery-guide`, details, {timeout: 15000});
     }
 
     recordDispatchWeighing(id, measurement) {
@@ -145,7 +149,7 @@ export class OrderManagementApi extends BaseApi {
         if (status && status !== response.data.status) {
             response = status === 'CANCELLED'
                 ? await this.http.post(`${dispatchesEndpointPath}/${resource.id}/cancellation`, {reason: resource.observations || 'Cancelled by user', performedBy: 'Current user'})
-                : await this.http.patch(`${dispatchesEndpointPath}/${resource.id}/status`, {status, performedBy: 'Current user'});
+                : await this.http.patch(`${dispatchesEndpointPath}/${resource.id}/status`, {status, performedBy: 'Current user'}, {timeout: 15000});
         }
         return response;
     }
