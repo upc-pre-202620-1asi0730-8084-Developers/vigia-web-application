@@ -1,7 +1,7 @@
 <script setup>
 import {useI18n} from "vue-i18n";
-import {useRoute, useRouter} from "vue-router";
-import {computed, onMounted} from "vue";
+import {useRoute, useRouter, onBeforeRouteLeave, onBeforeRouteUpdate} from "vue-router";
+import {computed, ref, watch} from "vue";
 import useOrderManagementStore from "../../application/order-management.store.js";
 import {Order} from "../../domain/model/order.entity.js";
 import {ORDER_STATUS, orderPrioritySeverity, orderStatusSeverity} from "../../domain/order-status.js";
@@ -12,23 +12,45 @@ const route = useRoute();
 const router = useRouter();
 const store = useOrderManagementStore();
 const iam = useIamStore();
-const canReview = computed(() => ['ADMIN', 'WAREHOUSE_MANAGER'].includes(iam.currentRole) &&
+const ready = ref(false);
+const loading = ref(false);
+const saving = ref(false);
+const error = ref('');
+const feedback = ref('');
+let loadVersion = 0;
+const canReview = computed(() => ready.value && ['ADMIN', 'WAREHOUSE_MANAGER'].includes(iam.currentRole) &&
     ['PENDING', 'UNDER_REVIEW'].includes(order.value?.status));
-const {errors, updateOrder, fetchOrders} = store;
+const {updateOrder} = store;
 
 const order = computed(() => store.getOrderById(route.params.id));
 
-onMounted(() => {
-  if (!store.ordersLoaded) fetchOrders();
-});
+async function load() {
+  const version = ++loadVersion;
+  const id = route.params.id;
+  ready.value = false;
+  loading.value = true;
+  error.value = '';
+  try {
+    await store.fetchOrder(id);
+    if (version === loadVersion) ready.value = true;
+  } catch (failure) {
+    if (version === loadVersion) error.value = failure.response?.status === 404 ? 'orders.detail.notFound' : 'orders.detail.loadError';
+  } finally { if (version === loadVersion) loading.value = false; }
+}
+watch(() => route.params.id, () => { feedback.value = ''; load(); }, {immediate: true});
+onBeforeRouteLeave(() => !saving.value);
+onBeforeRouteUpdate(() => !saving.value);
 
 /**
  * Applies a decision (approve / request changes / reject) to the current order.
  * @param {string} newStatus - Status the order moves to.
  * @param {string} noteKey - i18n key of the history note.
  */
-const decide = (newStatus, noteKey) => {
-  if (!canReview.value) return;
+const decide = async (newStatus, noteKey) => {
+  if (!canReview.value || saving.value) return;
+  saving.value = true;
+  error.value = '';
+  feedback.value = '';
   const note = t(noteKey);
   const timeline = [...order.value.timeline, {
     id: order.value.timeline.length + 1,
@@ -37,7 +59,13 @@ const decide = (newStatus, noteKey) => {
     description: note,
     date: new Date().toISOString().slice(0, 16).replace('T', ' ')
   }];
-  updateOrder(new Order({...order.value, status: newStatus, timeline}));
+  try {
+    const updated = await updateOrder(new Order({...order.value, status: newStatus, timeline}));
+    feedback.value = updated.status;
+  } catch {
+    await load();
+    error.value = 'orders.detail.feedbackError';
+  } finally { saving.value = false; }
 };
 
 /**
@@ -51,8 +79,12 @@ const navigateBack = () => {
 <template>
   <div class="p-4">
     <h1>{{ t('orders.detail.title') }}</h1>
-    <pv-button :label="t('orders.detail.back')" icon="pi pi-arrow-left" severity="secondary" class="mb-3" @click="navigateBack" />
-    <div v-if="order">
+    <pv-button :label="t('orders.detail.back')" icon="pi pi-arrow-left" severity="secondary" class="mb-3" :disabled="saving" @click="navigateBack" />
+    <p v-if="loading" role="status">{{ t('orders.detail.loading') }}</p>
+    <p v-if="error" role="alert" class="text-red-500">{{ t(error) }}</p>
+    <p v-if="feedback" role="status">{{ t('orders.detail.feedbackSaved', {status: t(`orders.status.${feedback}`)}) }}</p>
+    <pv-button :label="t('orders.request.refresh')" severity="secondary" :disabled="loading || saving" @click="load" />
+    <div v-if="ready && order" :aria-busy="saving">
       <h2>{{ order.code || order.id }}
         <pv-tag :value="t(`orders.status.${order.status}`)" :severity="orderStatusSeverity(order.status)" class="ml-2" />
         <pv-tag :value="t(`orders.priority.${order.priority}`)" :severity="orderPrioritySeverity(order.priority)" class="ml-2" />
@@ -87,12 +119,13 @@ const navigateBack = () => {
       <template v-if="canReview">
       <h3>{{ t('orders.detail.makeDecision') }}</h3>
       <pv-button :label="t('orders.detail.approve')" icon="pi pi-check" class="btn-primary"
-                 :disabled="order.status === ORDER_STATUS.APPROVED"
+                 :disabled="saving"
                  @click="decide(ORDER_STATUS.APPROVED, 'orders.detail.notes.approved')" />
       <pv-button :label="t('orders.detail.requestChanges')" icon="pi pi-pencil" severity="secondary" class="ml-2"
+                 :disabled="saving || order.status === ORDER_STATUS.UNDER_REVIEW"
                  @click="decide(ORDER_STATUS.UNDER_REVIEW, 'orders.detail.notes.changes')" />
       <pv-button :label="t('orders.detail.reject')" icon="pi pi-times" severity="danger" class="ml-2"
-                 :disabled="order.status === ORDER_STATUS.REJECTED"
+                 :disabled="saving"
                  @click="decide(ORDER_STATUS.REJECTED, 'orders.detail.notes.rejected')" />
       </template>
 
@@ -104,10 +137,6 @@ const navigateBack = () => {
           <small>{{ slotProps.item.user }} · {{ slotProps.item.date }}</small>
         </template>
       </pv-timeline>
-    </div>
-    <p v-else>{{ t('orders.detail.notFound') }}</p>
-    <div v-if="errors.length" class="text-red-500 mt-3">
-      {{ t('errors.occurred') }}: {{ errors.map(e => e.message).join(', ') }}
     </div>
   </div>
 </template>

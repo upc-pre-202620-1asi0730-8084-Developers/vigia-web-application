@@ -820,6 +820,8 @@
       "reject": "Rechazar",
       "history": "Historial de la solicitud",
       "notFound": "Solicitud no encontrada.",
+      "loading": "Cargando solicitud…",
+      "loadError": "No se pudo cargar la solicitud. Actualiza los datos antes de continuar.",
       "feedbackSaved": "Solicitud actualizada a: {status}",
       "feedbackError": "No se pudo actualizar la solicitud.",
       "notes": {
@@ -922,6 +924,7 @@
       "observationsPlaceholder": "Agrega información adicional sobre el despacho...",
       "create": "Crear despacho",
       "validationError": "Completa los campos obligatorios (*) para continuar.",
+      "saveError": "No se pudo confirmar la creación. Revisa la lista de despachos antes de volver a enviar para evitar un duplicado.",
       "steps": {
         "information": "Información",
         "materials": "Materiales",

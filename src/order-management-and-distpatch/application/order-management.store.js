@@ -134,16 +134,21 @@ const useOrderManagementStore = defineStore('orderManagement', () => {
     /**
      * Updates an existing order and synchronizes local state.
      * @param {Order} order - Order entity with updated data.
-     * @returns {void}
+     * @returns {Promise<Order>}
      */
-    function updateOrder(order) {
-        orderManagementApi.updateOrder(order).then(response => {
-            const updatedOrder = OrderAssembler.toEntityFromResource(response.data);
-            const index = orders.value.findIndex(o => o["id"] === updatedOrder.id);
-            if (index !== -1) orders.value[index] = updatedOrder;
-        }).catch(error => {
-            errors.value.push(error);
-        });
+    async function updateOrder(order) {
+        const updatedOrder = OrderAssembler.toEntityFromResource((await orderManagementApi.updateOrder(order)).data);
+        const index = orders.value.findIndex(o => String(o.id) === String(updatedOrder.id));
+        if (index !== -1) orders.value[index] = updatedOrder;
+        return updatedOrder;
+    }
+
+    async function fetchOrder(id) {
+        const order = OrderAssembler.toEntityFromResource((await orderManagementApi.getOrderById(id)).data);
+        const index = orders.value.findIndex(o => String(o.id) === String(id));
+        if (index < 0) orders.value.push(order);
+        else orders.value[index] = order;
+        return order;
     }
 
     /**
@@ -244,6 +249,7 @@ const useOrderManagementStore = defineStore('orderManagement', () => {
     }
 
     return {
+        fetchOrder,
         fetchDispatch,
         fetchDispatchWeighings,
         recordDispatchWeighing,

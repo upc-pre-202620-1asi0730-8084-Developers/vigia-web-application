@@ -820,6 +820,8 @@
       "reject": "Reject",
       "history": "Request history",
       "notFound": "Request not found.",
+      "loading": "Loading request…",
+      "loadError": "Unable to load the request. Refresh the data before continuing.",
       "feedbackSaved": "Request updated to: {status}",
       "feedbackError": "The request could not be updated.",
       "notes": {
@@ -922,6 +924,7 @@
       "observationsPlaceholder": "Add additional information about the dispatch...",
       "create": "Create dispatch",
       "validationError": "Complete the required fields (*) to continue.",
+      "saveError": "Creation could not be confirmed. Check the dispatch list before submitting again to avoid a duplicate.",
       "steps": {
         "information": "Information",
         "materials": "Materials",
