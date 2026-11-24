@@ -5,6 +5,10 @@ export class DiscrepancyCaseAssembler {
         return new DiscrepancyCase({
             id: resource.id,
             dispatchId: resource.dispatchId,
+            receptionId: resource.receptionId,
+            caseNumber: resource.caseNumber,
+            closedAt: resource.closedAt,
+            resolutionSummary: resource.resolutionSummary,
             projectName: resource.projectName,
             issueType: resource.issueType,
             status: resource.status,
