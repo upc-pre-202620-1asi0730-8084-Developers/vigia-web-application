@@ -20,9 +20,10 @@ export class Order {
      * @param {Object[]} [params.attachedFiles=[]] - Attached files.
      * @param {Object[]} [params.timeline=[]] - Order history events.
      */
-    constructor({ id = null, projectName = '', requesterName = '', status = 'PENDING', priority = 'AVERAGE',
+    constructor({ id = null, code = '', projectName = '', requesterName = '', status = 'PENDING', priority = 'AVERAGE',
                   date = '', mainMaterial = '', items = [], observations = '', attachedFiles = [], timeline = [] }) {
         this.id = id;
+        this.code = code;
         this.projectName = projectName;
         this.requesterName = requesterName;
         this.status = status;

@@ -5,11 +5,15 @@ import {computed, onMounted} from "vue";
 import useOrderManagementStore from "../../application/order-management.store.js";
 import {Order} from "../../domain/model/order.entity.js";
 import {ORDER_STATUS, orderPrioritySeverity, orderStatusSeverity} from "../../domain/order-status.js";
+import useIamStore from '../../../iam/application/iam.store.js';
 
 const {t} = useI18n();
 const route = useRoute();
 const router = useRouter();
 const store = useOrderManagementStore();
+const iam = useIamStore();
+const canReview = computed(() => ['ADMIN', 'WAREHOUSE_MANAGER'].includes(iam.currentRole) &&
+    ['PENDING', 'UNDER_REVIEW'].includes(order.value?.status));
 const {errors, updateOrder, fetchOrders} = store;
 
 const order = computed(() => store.getOrderById(route.params.id));
@@ -24,11 +28,12 @@ onMounted(() => {
  * @param {string} noteKey - i18n key of the history note.
  */
 const decide = (newStatus, noteKey) => {
+  if (!canReview.value) return;
   const note = t(noteKey);
   const timeline = [...order.value.timeline, {
     id: order.value.timeline.length + 1,
     title: note,
-    user: 'Carlos Mendoza',
+    user: iam.currentUsername,
     description: note,
     date: new Date().toISOString().slice(0, 16).replace('T', ' ')
   }];
@@ -48,10 +53,13 @@ const navigateBack = () => {
     <h1>{{ t('orders.detail.title') }}</h1>
     <pv-button :label="t('orders.detail.back')" icon="pi pi-arrow-left" severity="secondary" class="mb-3" @click="navigateBack" />
     <div v-if="order">
-      <h2>{{ order.id }}
+      <h2>{{ order.code || order.id }}
         <pv-tag :value="t(`orders.status.${order.status}`)" :severity="orderStatusSeverity(order.status)" class="ml-2" />
         <pv-tag :value="t(`orders.priority.${order.priority}`)" :severity="orderPrioritySeverity(order.priority)" class="ml-2" />
       </h2>
+      <p v-if="iam.currentRole === 'SITE_MANAGER'" role="status">
+        {{ t(order.status === 'PENDING' ? 'orders.request.awaiting' : 'orders.request.acknowledged') }}
+      </p>
       <p><strong>{{ t('orders.detail.work') }}:</strong> {{ order.projectName }}</p>
       <p><strong>{{ t('orders.detail.date') }}:</strong> {{ order.date }}</p>
       <p><strong>{{ t('orders.detail.requester') }}:</strong> {{ order.requesterName }}</p>
@@ -76,6 +84,7 @@ const navigateBack = () => {
       </ul>
       <p v-else>{{ t('orders.detail.noFiles') }}</p>
 
+      <template v-if="canReview">
       <h3>{{ t('orders.detail.makeDecision') }}</h3>
       <pv-button :label="t('orders.detail.approve')" icon="pi pi-check" class="btn-primary"
                  :disabled="order.status === ORDER_STATUS.APPROVED"
@@ -85,6 +94,7 @@ const navigateBack = () => {
       <pv-button :label="t('orders.detail.reject')" icon="pi pi-times" severity="danger" class="ml-2"
                  :disabled="order.status === ORDER_STATUS.REJECTED"
                  @click="decide(ORDER_STATUS.REJECTED, 'orders.detail.notes.rejected')" />
+      </template>
 
       <h3 class="mt-4">{{ t('orders.detail.history') }}</h3>
       <pv-timeline :value="order.timeline">

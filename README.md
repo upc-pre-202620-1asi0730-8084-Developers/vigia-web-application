@@ -203,3 +203,11 @@ Tip: to use a real backend, set its URL in `VITE_LEARNING_PLATFORM_API_URL` and 
 - Use the color tokens of `src/style.css` instead of hardcoded colors.
 - Add both English and Spanish texts for every new UI string.
 - Prefer explicit domain language in naming and docs.
+
+## Resident material requests
+
+Residents can open **Material Orders → New material request** and select an assigned project and its requestable materials. The form sends numeric project/material IDs and positive whole quantities through the application store. The API supplies the requester identity, material names/units and request code. A successful request starts as `PENDING`; the detail page preserves its numeric route ID and displays the business code.
+
+Residents can read their own requests and see warehouse acknowledgement after review. Approval controls remain restricted to warehouse/admin perspectives. While the warehouse request list is visible, it refreshes every 15 seconds and announces new pending requests; manual refresh is also available. This is an in-app queue, not an email or push-notification service.
+
+This feature requires the backend request-catalog/submission endpoints and `AddOrderRequesterAccount` migration. An empty assigned-project catalog shows an explicit message rather than fabricating demo data. English and Spanish labels are included. The feature does not publish a release or change Firebase configuration.
