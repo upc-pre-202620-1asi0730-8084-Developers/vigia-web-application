@@ -3,6 +3,8 @@ import { ref, computed } from 'vue';
 import { ReceptionApi } from '../infrastructure/reception-api.js';
 import { ReceptionAssembler } from '../infrastructure/reception.assembler.js';
 import { RECEPTION_STATUS } from '../domain/reception-status.js';
+import useOrderManagementStore from '../../order-management-and-distpatch/application/order-management.store.js';
+import useTransitTraceabilityStore from '../../transit-traceability/application/transit-traceability.store.js';
 
 const receptionApi = new ReceptionApi();
 
@@ -28,12 +30,11 @@ export const useReceptionStore = defineStore('reception', () => {
     const totalCount = computed(() => receptions.value.length);
 
     const todayReceptionsCount = computed(() => {
-        // Recepciones con fecha de hoy o en estado activo
+        const today = new Date().toDateString();
         return receptions.value.filter(r => {
             const date = new Date(r.arrivedAt);
-            const now = new Date();
-            return date.getDate() === now.getDate() || r.status === RECEPTION_STATUS.ARRIVED || r.status === RECEPTION_STATUS.VERIFIED_CONFORMANT;
-        }).length || 8;
+            return date.toDateString() === today || r.status === RECEPTION_STATUS.ARRIVED;
+        }).length;
     });
 
     const completedCount = computed(() => {
@@ -143,6 +144,15 @@ export const useReceptionStore = defineStore('reception', () => {
         }
     }
 
+    async function syncAfterReceptionChange() {
+        const orderStore = useOrderManagementStore();
+        const transitStore = useTransitTraceabilityStore();
+        const tasks = [fetchReceptions(), fetchUpcomingArrivals()];
+        if (orderStore.dispatchesLoaded) tasks.push(orderStore.fetchDispatches());
+        if (transitStore.routesLoaded) tasks.push(transitStore.fetchRoutes());
+        await Promise.allSettled(tasks);
+    }
+
     /**
      * Registra una nueva recepción de material en obra (US-09).
      * @param {Object} formData
@@ -152,19 +162,9 @@ export const useReceptionStore = defineStore('reception', () => {
         const payload = ReceptionAssembler.toResourceFromEntity(formData);
         const response = await receptionApi.createReception(payload);
         const entity = ReceptionAssembler.toEntityFromResource(response.data);
-        const existing = receptions.value.findIndex(r => String(r.id) === String(entity.id));
-        if (existing === -1) receptions.value.unshift(entity);
-        else receptions.value[existing] = entity;
-        selectedReception.value = entity;
-
-        // Remover de llegadas próximas si provenía de un despacho en tránsito
-        if (formData.dispatchId) {
-            upcomingArrivals.value = upcomingArrivals.value.filter(
-                a => String(a.dispatchId || a.id) !== String(formData.dispatchId)
-            );
-        }
-
-        return entity;
+        await syncAfterReceptionChange();
+        selectedReception.value = receptions.value.find(r => String(r.id) === String(entity.id)) || entity;
+        return selectedReception.value;
     }
 
     /**
@@ -185,54 +185,37 @@ export const useReceptionStore = defineStore('reception', () => {
     async function verifyReception(receptionId, verificationData = {}) {
         const current = receptions.value.find(r => String(r.id) === String(receptionId));
         const response = await receptionApi.verifyReception(receptionId, {
-            ...verificationData, checklist: {...current?.checklist, ...verificationData.checklist},
+            ...verificationData,
+            checklist: { ...current?.checklist, ...verificationData.checklist },
             observations: verificationData.observations ?? current?.observations
         });
         const updatedEntity = ReceptionAssembler.toEntityFromResource(response.data);
-
-        const index = receptions.value.findIndex(r => String(r.id) === String(receptionId));
-        if (index !== -1) {
-            receptions.value[index] = updatedEntity;
-        }
+        await syncAfterReceptionChange();
+        const refreshed = receptions.value.find(r => String(r.id) === String(receptionId));
         if (selectedReception.value && String(selectedReception.value.id) === String(receptionId)) {
-            selectedReception.value = updatedEntity;
+            selectedReception.value = refreshed || updatedEntity;
         }
-        return updatedEntity;
+        return refreshed || updatedEntity;
     }
 
     /**
      * Registra un reporte de discrepancia con evidencia fotográfica (US-10).
      * @param {string|number} receptionId
-     * @param {Object} payload - { observations, evidence }
+     * @param {Object} payload - { observations, evidence, requestId }
      */
-    async function reportDiscrepancy(receptionId, { observations, evidence }) {
-        let updatedEntity = null;
-
-        if (evidence && (evidence.evidenceUrl || evidence.caption)) {
-            const evRes = await receptionApi.addEvidence(receptionId, evidence);
-            updatedEntity = ReceptionAssembler.toEntityFromResource(evRes.data);
-        }
-
-        const verifyRes = await receptionApi.verifyReception(receptionId, {
+    async function reportDiscrepancy(receptionId, { observations, evidence, requestId = null }) {
+        const hasPhotographicEvidence = Boolean(
+            evidence || receptions.value.find(r => String(r.id) === String(receptionId))?.evidences?.length
+        );
+        return await verifyReception(receptionId, {
             status: RECEPTION_STATUS.VERIFIED_DISCREPANT,
-            observations: observations,
+            requestId,
+            observations,
             checklist: {
-                ...receptions.value.find(r => String(r.id) === String(receptionId))?.checklist,
                 observationsRecorded: true,
-                photographicEvidence: Boolean(evidence)
+                photographicEvidence: hasPhotographicEvidence
             }
         });
-
-        updatedEntity = ReceptionAssembler.toEntityFromResource(verifyRes.data);
-
-        const index = receptions.value.findIndex(r => String(r.id) === String(receptionId));
-        if (index !== -1) {
-            receptions.value[index] = updatedEntity;
-        }
-        if (selectedReception.value && String(selectedReception.value.id) === String(receptionId)) {
-            selectedReception.value = updatedEntity;
-        }
-        return updatedEntity;
     }
 
     /**

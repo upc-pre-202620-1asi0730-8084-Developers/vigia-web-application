@@ -5,6 +5,14 @@ import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'primevue';
 import { useReceptionStore } from '../../application/reception.store.js';
 import useIamStore from '../../../iam/application/iam.store.js';
+import {
+  canActorEditReception,
+  clearPendingReceptionRequest,
+  hasAuthoritativeGuide,
+  mapReceptionErrorKey,
+  readPendingReceptionRequest,
+  savePendingReceptionRequest
+} from '../../domain/reception-verification.js';
 
 /**
  * Page to register the reception of a dispatch at the site (US-09).
@@ -19,11 +27,13 @@ const iamStore = useIamStore();
 
 const isSubmitting = ref(false);
 const errorMessage = ref('');
-
 const selectedArrivalId = ref(null);
+const existingReception = ref(null);
+
+const isEditingExisting = computed(() => Boolean(route.query.reception));
 
 const form = reactive({
-  siteName: 'Torre A',
+  siteName: '',
   origin: '',
   dispatchId: '',
   deliveryGuideNumber: '',
@@ -37,21 +47,23 @@ const form = reactive({
     photographicEvidence: false,
     observationsRecorded: false
   },
-  items: [
-    {
-      id: 1,
-      materialName: 'Cemento Portland',
-      dispatchedQuantity: 100,
-      receivedQuantity: 100,
-      unit: 'sacks'
-    }
-  ]
+  items: []
 });
+
+const canEditTarget = computed(() => !isEditingExisting.value ||
+    canActorEditReception(existingReception.value, iamStore.currentUserId, iamStore.currentRole));
+
+const canSubmit = computed(() => !isSubmitting.value && canEditTarget.value &&
+    hasAuthoritativeGuide(form) && form.items.length > 0);
+
+const pendingRequestKey = computed(() => form.dispatchId
+    ? `vigia.reception.register.${iamStore.currentUserId}.${form.dispatchId}`
+    : '');
 
 // Opciones de despachos próximos en tránsito
 const arrivalOptions = computed(() => {
   return receptionStore.upcomingArrivals.map(a => ({
-    label: `${a.id || a.dispatchId} - ${a.material} (${a.origin})`,
+    label: `${a.id || a.dispatchId} · ${a.deliveryGuideNumber || '—'} · ${a.material} (${a.origin})`,
     value: a.id || a.dispatchId,
     arrival: a
   }));
@@ -60,9 +72,9 @@ const arrivalOptions = computed(() => {
 onMounted(async () => {
   try {
     if (!receptionStore.upcomingArrivals.length) await receptionStore.fetchUpcomingArrivals();
-    if (route.query.reception && !receptionStore.receptions.length) await receptionStore.fetchReceptions();
+    if (route.query.reception) await receptionStore.fetchReceptions();
   } catch (err) {
-    errorMessage.value = err.message || t('receptions.dialog.errorSaving');
+    errorMessage.value = t(mapReceptionErrorKey(err));
   }
   applyQuerySelection();
 });
@@ -70,71 +82,107 @@ onMounted(async () => {
 // Reapply the selection when only the query changes (e.g. browser back/forward between arrivals).
 watch(() => route.query, applyQuerySelection);
 
+function resetForm() {
+  selectedArrivalId.value = null;
+  existingReception.value = null;
+  form.origin = '';
+  form.dispatchId = '';
+  form.deliveryGuideNumber = '';
+  form.truckPlate = '';
+  form.driverName = '';
+  form.siteName = '';
+  form.observations = '';
+  form.items = [];
+}
+
 /** Preloads the arrival (?arrival=) or reception (?reception=) named in the URL, or the first upcoming arrival. */
 function applyQuerySelection() {
-  const preselected = route.query.reception
-      ? receptionStore.receptions.find(r => String(r.id) === String(route.query.reception))
-      : receptionStore.upcomingArrivals.find(a => String(a.id || a.dispatchId) === String(route.query.arrival));
-  applyArrival(preselected || receptionStore.upcomingArrivals[0]);
+  errorMessage.value = '';
+  if (route.query.reception) {
+    const found = receptionStore.receptions.find(r => String(r.id) === String(route.query.reception));
+    if (!found) {
+      resetForm();
+      errorMessage.value = t('receptions.errors.notFound');
+      return;
+    }
+    existingReception.value = found;
+    applyArrival(found);
+    if (!canActorEditReception(found, iamStore.currentUserId, iamStore.currentRole)) {
+      errorMessage.value = found.isClosed ? t('receptions.errors.conflict') : t('receptions.errors.forbidden');
+    }
+    return;
+  }
+  existingReception.value = null;
+  const preselected = receptionStore.upcomingArrivals.find(a => String(a.id || a.dispatchId) === String(route.query.arrival));
+  const target = preselected || receptionStore.upcomingArrivals[0];
+  if (target) applyArrival(target);
+  else resetForm();
 }
 
 function applyArrival(arrival) {
   if (!arrival) return;
   selectedArrivalId.value = arrival.id || arrival.dispatchId;
   form.origin = arrival.origin || '';
-  form.dispatchId = arrival.dispatchId || arrival.id || '';
+  form.dispatchId = String(arrival.dispatchId || arrival.id || '');
   form.deliveryGuideNumber = arrival.deliveryGuideNumber || '';
   form.truckPlate = arrival.truckPlate || arrival.truck || '';
   form.driverName = arrival.driverName || '';
   form.siteName = arrival.siteName || '';
+  form.observations = arrival.observations || '';
+  if (arrival.checklist) {
+    form.checklist = { ...form.checklist, ...arrival.checklist };
+  }
 
-  form.items = arrival.items?.length ? arrival.items.map((item, index) => ({...item, id: index + 1})) : [
-    {
-      id: 1,
-      materialName: arrival.material || 'Material en tránsito',
-      dispatchedQuantity: arrival.dispatchedQuantity || 24,
-      receivedQuantity: arrival.dispatchedQuantity || 24,
-      unit: arrival.unit || 't'
-    }
-  ];
+  form.items = arrival.items?.length ? arrival.items.map((item, index) => ({
+    ...item,
+    id: item.id ?? index + 1
+  })) : [];
 }
 
 function onArrivalSelect(e) {
+  errorMessage.value = '';
   const chosen = receptionStore.upcomingArrivals.find(a => (a.id || a.dispatchId) === e.value);
   if (chosen) {
     applyArrival(chosen);
   }
 }
 
-function addItem() {
-  form.items.push({
-    id: Date.now(),
-    materialName: '',
-    dispatchedQuantity: 10,
-    receivedQuantity: 10,
-    unit: 't'
-  });
-}
-
-function removeItem(index) {
-  if (form.items.length > 1) {
-    form.items.splice(index, 1);
-  }
-}
-
 async function onSubmit() {
-  if (!form.dispatchId || !form.deliveryGuideNumber) {
+  if (!hasAuthoritativeGuide(form) || !form.items.length) {
     errorMessage.value = t('receptions.dialog.requiredFields');
+    return;
+  }
+  if (!canEditTarget.value) {
+    errorMessage.value = t('receptions.errors.forbidden');
     return;
   }
 
   isSubmitting.value = true;
   errorMessage.value = '';
 
+  const storage = typeof sessionStorage !== 'undefined' ? sessionStorage : null;
+  let requestId = null;
+  if (!isEditingExisting.value && pendingRequestKey.value) {
+    const existingPending = readPendingReceptionRequest(storage, pendingRequestKey.value);
+    if (existingPending && existingPending.dispatchId === form.dispatchId &&
+        existingPending.guideNumber === form.deliveryGuideNumber) {
+      requestId = existingPending.requestId;
+    } else {
+      requestId = crypto.randomUUID();
+      savePendingReceptionRequest(storage, pendingRequestKey.value, {
+        requestId,
+        action: 'register',
+        dispatchId: form.dispatchId,
+        guideNumber: form.deliveryGuideNumber
+      });
+    }
+  }
+
   try {
     const payload = {
       id: route.query.reception ? Number(route.query.reception) : null,
       dispatchId: form.dispatchId,
+      requestId,
       verifiedByUserId: iamStore.currentUserId,
       verifiedByUserName: iamStore.currentUsername,
       siteName: form.siteName,
@@ -154,10 +202,15 @@ async function onSubmit() {
     };
 
     const newReception = await receptionStore.registerReception(payload);
+    if (pendingRequestKey.value) clearPendingReceptionRequest(storage, pendingRequestKey.value);
     toast.add({ severity: 'success', summary: t('receptions.dialog.saved'), detail: newReception?.id, life: 3000 });
     goBack();
   } catch (err) {
-    errorMessage.value = err.message || t('receptions.dialog.errorSaving');
+    const status = Number(err?.status ?? 0);
+    if (status >= 400 && status < 500 && pendingRequestKey.value) {
+      clearPendingReceptionRequest(storage, pendingRequestKey.value);
+    }
+    errorMessage.value = t(mapReceptionErrorKey(err));
   } finally {
     isSubmitting.value = false;
   }
@@ -181,7 +234,7 @@ function goBack() {
       </div>
 
       <!-- Selector de Despacho en camino -->
-      <div class="form-section mb-4">
+      <div v-if="!isEditingExisting" class="form-section mb-4">
         <label class="section-label">
           <i class="pi pi-truck mr-1 text-primary"></i>
           {{ t('receptions.dialog.selectArrival') }}
@@ -191,42 +244,44 @@ function goBack() {
           :options="arrivalOptions"
           optionLabel="label"
           optionValue="value"
-          placeholder="Seleccionar despacho en camino..."
+          :disabled="!arrivalOptions.length || isSubmitting"
+          :placeholder="t('receptions.dialog.selectArrival')"
           class="w-full"
           @change="onArrivalSelect"
         />
-        <small class="caption">{{ t('receptions.dialog.selectArrivalHelp') }}</small>
+        <small class="caption">{{ arrivalOptions.length ? t('receptions.dialog.selectArrivalHelp') : t('receptions.dialog.noUpcomingArrivals') }}</small>
       </div>
 
-      <!-- Datos del Despacho y Transporte -->
+      <!-- Datos del Despacho y Transporte (emitidos por el servidor) -->
       <div class="grid grid-nogutter form-grid mb-3">
         <div class="col-12 md:col-6 pr-md-2 mb-3">
           <label class="field-label">{{ t('receptions.dialog.dispatchId') }} *</label>
-          <pv-input-text v-model="form.dispatchId" class="w-full" placeholder="Ej. TR-315 o DES-250" />
+          <pv-input-text v-model="form.dispatchId" class="w-full" readonly disabled />
         </div>
         <div class="col-12 md:col-6 pl-md-2 mb-3">
           <label class="field-label">{{ t('receptions.dialog.deliveryGuide') }} *</label>
-          <pv-input-text v-model="form.deliveryGuideNumber" class="w-full" placeholder="Ej. GR-78452" />
+          <pv-input-text v-model="form.deliveryGuideNumber" class="w-full" readonly disabled />
         </div>
 
         <div class="col-12 md:col-6 pr-md-2 mb-3">
           <label class="field-label">{{ t('receptions.dialog.origin') }}</label>
-          <pv-input-text v-model="form.origin" class="w-full" placeholder="Ej. Cantera Los Pinos / Cemex" />
+          <pv-input-text v-model="form.origin" class="w-full" readonly disabled />
         </div>
         <div class="col-12 md:col-6 pl-md-2 mb-3">
           <label class="field-label">{{ t('receptions.dialog.site') }}</label>
-          <pv-input-text v-model="form.siteName" class="w-full" placeholder="Ej. Torre A / Planta Norte" />
+          <pv-input-text v-model="form.siteName" class="w-full" readonly disabled />
         </div>
 
         <div class="col-12 md:col-6 pr-md-2 mb-3">
           <label class="field-label">{{ t('receptions.dialog.truckPlate') }}</label>
-          <pv-input-text v-model="form.truckPlate" class="w-full" placeholder="Ej. TR-315 (AB-123-CD)" />
+          <pv-input-text v-model="form.truckPlate" class="w-full" readonly disabled />
         </div>
         <div class="col-12 md:col-6 pl-md-2 mb-3">
           <label class="field-label">{{ t('receptions.dialog.driver') }}</label>
-          <pv-input-text v-model="form.driverName" class="w-full" placeholder="Ej. Carlos Mendoza" />
+          <pv-input-text v-model="form.driverName" class="w-full" readonly disabled />
         </div>
       </div>
+      <small class="caption block mb-3">{{ t('receptions.dialog.lockedGuideHelp') }}</small>
 
       <!-- Ítems y Cantidades a Cotejar -->
       <div class="items-section mb-4">
@@ -235,12 +290,6 @@ function goBack() {
             <i class="pi pi-box mr-1 text-primary"></i>
             {{ t('receptions.dialog.itemsToVerify') }}
           </label>
-          <pv-button
-            icon="pi pi-plus"
-            :label="t('receptions.dialog.addItem')"
-            class="p-button-sm btn-secondary"
-            @click="addItem"
-          />
         </div>
 
         <div class="items-table-container">
@@ -252,35 +301,26 @@ function goBack() {
                 <th style="width: 130px;">{{ t('receptions.table.received') }}</th>
                 <th style="width: 90px;">{{ t('receptions.table.unit') }}</th>
                 <th style="width: 100px;">{{ t('receptions.table.diff') }}</th>
-                <th style="width: 48px;"></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, idx) in form.items" :key="item.id">
+              <tr v-for="item in form.items" :key="item.id">
                 <td>
-                  <pv-input-text v-model="item.materialName" class="w-full" placeholder="Nombre material" />
+                  <pv-input-text v-model="item.materialName" class="w-full" readonly disabled />
                 </td>
                 <td>
-                  <pv-input-number v-model="item.dispatchedQuantity" :min="0" :maxFractionDigits="3" class="w-full" />
+                  <pv-input-number v-model="item.dispatchedQuantity" :min="0" :maxFractionDigits="3" class="w-full" disabled />
                 </td>
                 <td>
-                  <pv-input-number v-model="item.receivedQuantity" :min="0" :maxFractionDigits="3" class="w-full" />
+                  <pv-input-number v-model="item.receivedQuantity" :min="0" :maxFractionDigits="3" class="w-full" :disabled="!canEditTarget || isSubmitting" />
                 </td>
                 <td>
-                  <pv-input-text v-model="item.unit" class="w-full" placeholder="t, m³, kg" />
+                  <pv-input-text v-model="item.unit" class="w-full" readonly disabled />
                 </td>
                 <td class="text-center font-bold">
                   <span :class="(item.dispatchedQuantity - item.receivedQuantity) > 0 ? 'text-red-500' : 'text-green-600'">
                     {{ (item.dispatchedQuantity - item.receivedQuantity).toFixed(1) }}
                   </span>
-                </td>
-                <td class="text-center">
-                  <pv-button
-                    icon="pi pi-trash"
-                    class="p-button-text p-button-danger p-button-sm"
-                    @click="removeItem(idx)"
-                    :disabled="form.items.length <= 1"
-                  />
                 </td>
               </tr>
             </tbody>
@@ -337,6 +377,7 @@ function goBack() {
           icon="pi pi-check"
           class="btn-accent"
           @click="onSubmit"
+          :disabled="!canSubmit"
           :loading="isSubmitting"
         />
       </div>

@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useReceptionStore } from '../../application/reception.store.js';
 import { RECEPTION_STATUS } from '../../domain/reception-status.js';
+import { canActorEditReception } from '../../domain/reception-verification.js';
 import useIamStore from '../../../iam/application/iam.store.js';
 
 const props = defineProps({
@@ -31,8 +32,8 @@ const timeFilterOptions = [
 const selectedItem = computed(() => {
   return receptionStore.selectedReception || receptionStore.receptions[0] || null;
 });
-const canEditSelected = computed(() => selectedItem.value && !selectedItem.value.isClosed &&
-    String(selectedItem.value.verifiedByUserId) === String(iamStore.currentUserId));
+const canEditSelected = computed(() =>
+    canActorEditReception(selectedItem.value, iamStore.currentUserId, iamStore.currentRole));
 
 function selectRow(item) {
   receptionStore.selectReception(item);
@@ -250,7 +251,7 @@ const comparisonPercentages = computed(() => {
                       {{ getStatusLabel(rec.status) }}
                     </span>
                   </td>
-                  <td>{{ rec.verifiedByUserName || 'Juan Pérez' }}</td>
+                  <td>{{ rec.verifiedByUserName || '-' }}</td>
                   <td class="text-secondary text-xs">
                     {{ new Date(rec.arrivedAt).toLocaleDateString() }} {{ new Date(rec.arrivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
                   </td>
@@ -321,7 +322,7 @@ const comparisonPercentages = computed(() => {
           </div>
           <div class="meta-row">
             <span class="meta-label">{{ t('receptions.details.responsible') }}</span>
-            <span class="meta-value">{{ selectedItem.verifiedByUserName || 'Juan Pérez' }}</span>
+            <span class="meta-value">{{ selectedItem.verifiedByUserName || '-' }}</span>
           </div>
           <div class="meta-row">
             <span class="meta-label">{{ t('receptions.details.location') }}</span>
