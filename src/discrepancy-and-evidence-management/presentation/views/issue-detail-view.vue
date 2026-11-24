@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue'
 import { useDiscrepancyStore } from '../../application/discrepancy.store.js'
@@ -15,7 +15,7 @@ const router = useRouter()
 const toast = useToast()
 const discrepancyStore = useDiscrepancyStore()
 const selectedResponsibility = ref('')
-const brokenImages = reactive({})
+import ProtectedEvidencePhoto from '../components/protected-evidence-photo.vue';
 
 const RESPONSIBILITIES = ['Warehouse', 'Transport', 'Site']
 const responsibilityOptions = computed(() => RESPONSIBILITIES.map(value => ({
@@ -35,11 +35,7 @@ const generateReport = async () => {
   }
 }
 
-onMounted(() => {
-  if (discrepancyStore.cases.length === 0) {
-    discrepancyStore.loadCases()
-  }
-})
+watch(()=>route.params.id,()=>discrepancyStore.loadCases(),{immediate:true});
 
 const saveResponsibility = async () => {
   if (!selectedResponsibility.value) {
@@ -160,16 +156,7 @@ const STAGE_ICONS = {
           <h2 class="mt-0">{{ t('issues.photographicEvidence.title') }}</h2>
           <div v-if="discrepancyCase.evidences.length > 0" class="evidence-grid">
             <figure v-for="evidence in discrepancyCase.evidences" :key="evidence.id" class="evidence">
-              <img
-                  v-if="!brokenImages[evidence.id]"
-                  :src="evidence.evidenceUrl"
-                  :alt="contentLabel('evidenceCaption', evidence.caption)"
-                  @error="brokenImages[evidence.id] = true"
-              >
-              <div v-else class="evidence-placeholder" role="img"
-                   :aria-label="contentLabel('evidenceCaption', evidence.caption)">
-                <i class="pi pi-image" aria-hidden="true" />
-              </div>
+              <ProtectedEvidencePhoto :url="evidence.evidenceUrl" :reception-id="discrepancyCase.receptionId" :caption="contentLabel('evidenceCaption',evidence.caption)" />
               <figcaption>
                 <strong>{{ contentLabel('evidenceType', evidence.type) }}</strong>
                 <span>{{ contentLabel('evidenceCaption', evidence.caption) }}</span>

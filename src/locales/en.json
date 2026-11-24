@@ -1075,5 +1075,33 @@
     "legacyTracking": "Historical record without a departure link",
     "newArrival": "A new dispatch is on its way to the site.",
     "arrivalError": "Could not refresh upcoming arrivals."
+  },
+  "evidenceFiles": {
+    "uploadTitle": "Attach photograph",
+    "limits": "JPEG or PNG, up to 5 MiB and 16 megapixels. Maximum 20 photos per reception.",
+    "photo": "Photograph",
+    "description": "Photograph description",
+    "upload": "Save photograph",
+    "retry": "Retry the same photograph",
+    "pending": "An upload is pending. After reloading, select the same file to recover the result without duplicating it.",
+    "saved": "Photograph saved and linked to the reception.",
+    "invalid": "Select a JPEG/PNG up to 5 MiB and a description of 1 to 250 characters.",
+    "sameFile": "The pending request requires the same file and description.",
+    "storageError": "Could not retain the pending request in this session.",
+    "forbidden": "The reception is not available to your account.",
+    "saveError": "Could not save the photograph. Check the file and input.",
+    "conflict": "The upload or state changed. Retry the same photo or refresh to review the reception.",
+    "uncertain": "No confirmation received. The request was retained: retry the same file.",
+    "externalReference": "External reference: this does not prove a photograph was uploaded to the system.",
+    "unavailable": "Could not retrieve the photograph or your account no longer has access.",
+    "download": "Download photograph",
+    "observations": "Describe the discrepancy",
+    "report": "Report discrepancy",
+    "photoFirst": "Save at least one photograph before reporting the discrepancy.",
+    "reportError": "Could not confirm the report. Saved photos are retained; refresh and review its state.",
+    "reload": "Refresh reception",
+    "missing": "Could not load this reception for your account.",
+    "reported": "Discrepancy reported.",
+    "back": "Back to receptions"
   }
 }

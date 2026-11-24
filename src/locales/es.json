@@ -1075,5 +1075,33 @@
     "legacyTracking": "Registro histórico sin vinculación de salida",
     "newArrival": "Hay un nuevo despacho en camino para la obra.",
     "arrivalError": "No se pudieron actualizar las próximas llegadas."
+  },
+  "evidenceFiles": {
+    "uploadTitle": "Adjuntar fotografía",
+    "limits": "JPEG o PNG, hasta 5 MiB y 16 megapíxeles. Máximo 20 fotografías por recepción.",
+    "photo": "Fotografía",
+    "description": "Descripción de la fotografía",
+    "upload": "Guardar fotografía",
+    "retry": "Reintentar la misma fotografía",
+    "pending": "Hay una carga pendiente. Si recargaste la página, vuelve a seleccionar el mismo archivo para recuperar el resultado sin duplicar.",
+    "saved": "Fotografía guardada y vinculada a la recepción.",
+    "invalid": "Selecciona un JPEG/PNG de hasta 5 MiB y una descripción de 1 a 250 caracteres.",
+    "sameFile": "La solicitud pendiente requiere el mismo archivo y descripción.",
+    "storageError": "No se pudo guardar la solicitud pendiente en esta sesión.",
+    "forbidden": "La recepción no está disponible para tu cuenta.",
+    "saveError": "No se pudo guardar la fotografía. Revisa el archivo y los datos.",
+    "conflict": "La carga o el estado cambió. Reintenta la misma fotografía o actualiza para revisar la recepción.",
+    "uncertain": "No se recibió confirmación. Conservamos la solicitud: reintenta el mismo archivo.",
+    "externalReference": "Referencia externa: no acredita una fotografía cargada en el sistema.",
+    "unavailable": "No se pudo recuperar la fotografía o tu cuenta ya no tiene acceso.",
+    "download": "Descargar fotografía",
+    "observations": "Describe la discrepancia",
+    "report": "Reportar discrepancia",
+    "photoFirst": "Guarda al menos una fotografía antes de reportar la discrepancia.",
+    "reportError": "No se pudo confirmar el reporte. La fotografía guardada se conserva; actualiza y revisa el estado.",
+    "reload": "Actualizar recepción",
+    "missing": "No se pudo cargar esta recepción para tu cuenta.",
+    "reported": "Discrepancia reportada.",
+    "back": "Volver a recepciones"
   }
 }
