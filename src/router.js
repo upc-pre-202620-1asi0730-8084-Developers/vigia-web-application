@@ -1,3 +1,5 @@
+import i18n from './i18n.js';
+import {watch} from 'vue';
 import {createRouter, createWebHashHistory} from "vue-router";
 import useIamStore from "./iam/application/iam.store.js";
 import iamRoutes from './iam/presentation/iam-routes.js';
@@ -37,43 +39,43 @@ const routes = [
         path: '/transporte',
         name: 'transporte',
         component: transportView,
-        meta: { title: 'Transporte y Flota', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER] }
+        meta: { titleKey: 'pageTitles.transportation_and_fleet', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER] }
     },
     {
         path: '/transporte/unidades/nueva',
         name: 'vehicle-new',
         component: vehicleRegisterForm,
-        meta: { title: 'Registrar unidad', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER] }
+        meta: { titleKey: 'pageTitles.register_vehicle', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER] }
     },
     {
         path: '/transporte/unidades/:id/gps',
         name: 'vehicle-pair-device',
         component: vehiclePairDeviceForm,
-        meta: { title: 'Vincular dispositivo GPS', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER] }
+        meta: { titleKey: 'pageTitles.pair_gps_device', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER] }
     },
     {
         path: '/recepciones',
         name: 'recepciones',
         component: receptionManagementView,
-        meta: { title: 'Recepciones en Obra', roles: [ROLES.ADMIN, ROLES.SITE_MANAGER] }
+        meta: { titleKey: 'pageTitles.site_receptions', roles: [ROLES.ADMIN, ROLES.SITE_MANAGER] }
     },
     {
         path: '/recepciones/nueva',
         name: 'reception-new',
         component: registerReceptionPage,
-        meta: { title: 'Registrar recepción', roles: [ROLES.ADMIN, ROLES.SITE_MANAGER] }
+        meta: { titleKey: 'pageTitles.register_reception', roles: [ROLES.ADMIN, ROLES.SITE_MANAGER] }
     },
     {
         path: '/recepciones/:id/discrepancia',
         name: 'reception-discrepancy',
         component: reportDiscrepancyPage,
-        meta: { title: 'Reportar discrepancia', roles: [ROLES.ADMIN, ROLES.SITE_MANAGER] }
+        meta: { titleKey: 'pageTitles.report_discrepancy', roles: [ROLES.ADMIN, ROLES.SITE_MANAGER] }
     },
     {
         path: '/:pathMatch(.*)*',
         name: 'not-found',
         component: pageNotFound,
-        meta: { title: 'Página no encontrada' }
+        meta: { titleKey: 'pageTitles.page_not_found' }
     }
 ];
 
@@ -83,13 +85,10 @@ const router = createRouter({
 });
 
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
     const iamStore = useIamStore();
-    const baseTitle = 'Vigía';
-    const pageTitle = to.meta['title'] || 'Plataforma';
-    document.title = `${baseTitle} - ${pageTitle}`;
-    if (!to.meta.public && !iamStore.isSignedIn) return next({name: 'iam-sign-in'});
-    if (to.meta.public && iamStore.isSignedIn) return next('/inicio');
+    if (!to.meta.public && !iamStore.isSignedIn) return {name: 'iam-sign-in'};
+    if (to.meta.public && iamStore.isSignedIn) return '/inicio';
 
     // Si la ruta define roles permitidos, verificar que el rol activo tenga acceso
     if (to.meta && Array.isArray(to.meta.roles)) {
@@ -98,15 +97,20 @@ router.beforeEach((to, from, next) => {
             // Redirigir a una ruta permitida para este rol
             const defaultAllowed = navigationItems.find(item => item.roles.includes(iamStore.currentRole));
             if (defaultAllowed && defaultAllowed.path !== to.path) {
-                return next({ path: defaultAllowed.path });
+                return { path: defaultAllowed.path };
             }
-            return next({ path: '/inicio' });
+            return { path: '/inicio' };
         }
     }
 
-    next();
+    return true;
 });
 
+function updateTitle() {
+    document.title = `Vigía - ${i18n.global.t(router.currentRoute.value.meta.titleKey || 'a11y.platform')}`;
+}
+router.afterEach((_to,_from,failure) => { if (!failure) updateTitle(); });
+watch(() => i18n.global.locale.value, updateTitle);
 export default router;
 
 window.addEventListener('vigia:session-expired', () => useIamStore().signOut(router));

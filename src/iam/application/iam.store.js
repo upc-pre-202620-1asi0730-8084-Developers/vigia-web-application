@@ -1,3 +1,4 @@
+import {authErrorKey} from '../domain/auth-error.js';
 import {defineStore} from 'pinia';
 import {computed, ref} from 'vue';
 import {IamApi} from '../infrastructure/iam-api.js';
@@ -56,7 +57,7 @@ export const useIamStore = defineStore('iam', () => {
             return user;
         } catch (failure) {
             signOut();
-            error.value = failure.response?.data?.message || 'Unable to sign in. Check your credentials and the API connection.';
+            error.value = authErrorKey(failure);
             return null;
         } finally {
             signingIn.value = false;
@@ -70,7 +71,7 @@ export const useIamStore = defineStore('iam', () => {
             await new IamApi().signUp(command);
             return await signIn(command, router);
         } catch (failure) {
-            error.value = failure.response?.data?.message || 'Unable to create the account. Use a password of at least 10 characters.';
+            error.value = authErrorKey(failure);
             return null;
         } finally {
             signingIn.value = false;

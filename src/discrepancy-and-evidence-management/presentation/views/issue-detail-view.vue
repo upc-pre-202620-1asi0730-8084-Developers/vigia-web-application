@@ -32,7 +32,7 @@ const generateReport = async () => {
 
   if (result) {
     notify('success', t('issues.report.generated', { fileName: result.fileName }))
-  }
+  } else { notify('error',t('issues.loadError')); }
 }
 
 watch(()=>route.params.id,()=>discrepancyStore.loadCases(),{immediate:true});
@@ -100,6 +100,7 @@ const STAGE_ICONS = {
 </script>
 
 <template>
+  <p v-if="discrepancyStore.error && discrepancyCase" role="alert">{{t('issues.loadError')}}</p>
   <section class="p-4">
     <pv-button :label="t('issues.title')" icon="pi pi-arrow-left" link class="back-link mb-2" @click="router.push('/problemas')" />
     <h1 class="mt-0">{{ t('issues.detailTitle') }}</h1>
@@ -200,7 +201,7 @@ const STAGE_ICONS = {
       </div>
     </div>
 
-    <div v-else class="subtitle">
+    <div v-else class="subtitle" role="status">
       {{ discrepancyStore.error ? t('issues.loadError') : t('issues.notFound') }}
     </div>
   </section>

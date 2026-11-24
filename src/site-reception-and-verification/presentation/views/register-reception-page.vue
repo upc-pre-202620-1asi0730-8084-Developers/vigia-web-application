@@ -239,7 +239,7 @@ function goBack() {
           <i class="pi pi-truck mr-1 text-primary"></i>
           {{ t('receptions.dialog.selectArrival') }}
         </label>
-        <pv-select
+        <pv-select input-id="receipt-arrival"
           v-model="selectedArrivalId"
           :options="arrivalOptions"
           optionLabel="label"
@@ -255,30 +255,30 @@ function goBack() {
       <!-- Datos del Despacho y Transporte (emitidos por el servidor) -->
       <div class="grid grid-nogutter form-grid mb-3">
         <div class="col-12 md:col-6 pr-md-2 mb-3">
-          <label class="field-label">{{ t('receptions.dialog.dispatchId') }} *</label>
-          <pv-input-text v-model="form.dispatchId" class="w-full" readonly disabled />
+          <label for="receipt-dispatchId" class="field-label">{{ t('receptions.dialog.dispatchId') }} *</label>
+          <pv-input-text id="receipt-dispatchId" v-model="form.dispatchId" class="w-full" readonly disabled />
         </div>
         <div class="col-12 md:col-6 pl-md-2 mb-3">
-          <label class="field-label">{{ t('receptions.dialog.deliveryGuide') }} *</label>
-          <pv-input-text v-model="form.deliveryGuideNumber" class="w-full" readonly disabled />
+          <label for="receipt-deliveryGuideNumber" class="field-label">{{ t('receptions.dialog.deliveryGuide') }} *</label>
+          <pv-input-text id="receipt-deliveryGuideNumber" v-model="form.deliveryGuideNumber" class="w-full" readonly disabled />
         </div>
 
         <div class="col-12 md:col-6 pr-md-2 mb-3">
-          <label class="field-label">{{ t('receptions.dialog.origin') }}</label>
-          <pv-input-text v-model="form.origin" class="w-full" readonly disabled />
+          <label for="receipt-origin" class="field-label">{{ t('receptions.dialog.origin') }}</label>
+          <pv-input-text id="receipt-origin" v-model="form.origin" class="w-full" readonly disabled />
         </div>
         <div class="col-12 md:col-6 pl-md-2 mb-3">
-          <label class="field-label">{{ t('receptions.dialog.site') }}</label>
-          <pv-input-text v-model="form.siteName" class="w-full" readonly disabled />
+          <label for="receipt-siteName" class="field-label">{{ t('receptions.dialog.site') }}</label>
+          <pv-input-text id="receipt-siteName" v-model="form.siteName" class="w-full" readonly disabled />
         </div>
 
         <div class="col-12 md:col-6 pr-md-2 mb-3">
-          <label class="field-label">{{ t('receptions.dialog.truckPlate') }}</label>
-          <pv-input-text v-model="form.truckPlate" class="w-full" readonly disabled />
+          <label for="receipt-truckPlate" class="field-label">{{ t('receptions.dialog.truckPlate') }}</label>
+          <pv-input-text id="receipt-truckPlate" v-model="form.truckPlate" class="w-full" readonly disabled />
         </div>
         <div class="col-12 md:col-6 pl-md-2 mb-3">
-          <label class="field-label">{{ t('receptions.dialog.driver') }}</label>
-          <pv-input-text v-model="form.driverName" class="w-full" readonly disabled />
+          <label for="receipt-driverName" class="field-label">{{ t('receptions.dialog.driver') }}</label>
+          <pv-input-text id="receipt-driverName" v-model="form.driverName" class="w-full" readonly disabled />
         </div>
       </div>
       <small class="caption block mb-3">{{ t('receptions.dialog.lockedGuideHelp') }}</small>
@@ -312,7 +312,7 @@ function goBack() {
                   <pv-input-number v-model="item.dispatchedQuantity" :min="0" :maxFractionDigits="3" class="w-full" disabled />
                 </td>
                 <td>
-                  <pv-input-number v-model="item.receivedQuantity" :min="0" :maxFractionDigits="3" class="w-full" :disabled="!canEditTarget || isSubmitting" />
+                  <pv-input-number :aria-label="`${t('receptions.table.received')}: ${item.materialName}`" v-model="item.receivedQuantity" :min="0" :maxFractionDigits="3" class="w-full" :disabled="!canEditTarget || isSubmitting" />
                 </td>
                 <td>
                   <pv-input-text v-model="item.unit" class="w-full" readonly disabled />
@@ -356,8 +356,8 @@ function goBack() {
 
       <!-- Observaciones -->
       <div class="mb-3">
-        <label class="field-label">{{ t('receptions.dialog.observations') }}</label>
-        <pv-textarea
+        <label for="receipt-observations" class="field-label">{{ t('receptions.dialog.observations') }}</label>
+        <pv-textarea id="receipt-observations" maxlength="500"
           v-model="form.observations"
           rows="2"
           class="w-full"

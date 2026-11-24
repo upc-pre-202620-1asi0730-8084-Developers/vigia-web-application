@@ -94,7 +94,7 @@ const prioritySeverity = (priority) => {
       </div>
     </div>
 
-    <div v-if="discrepancyStore.error" class="text-red-500 mb-3">
+    <div role="alert" v-if="discrepancyStore.error" class="text-red-500 mb-3">
       {{ t('issues.loadError') }}
     </div>
 
