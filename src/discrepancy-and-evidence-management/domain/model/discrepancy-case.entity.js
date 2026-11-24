@@ -2,6 +2,10 @@ export class DiscrepancyCase {
     constructor({
                     id,
                     dispatchId,
+                    receptionId,
+                    caseNumber,
+                    closedAt,
+                    resolutionSummary,
                     projectName,
                     issueType,
                     status,
@@ -15,6 +19,10 @@ export class DiscrepancyCase {
                 }) {
         this.id = id
         this.dispatchId = dispatchId
+        this.receptionId = receptionId
+        this.caseNumber = caseNumber
+        this.closedAt = closedAt
+        this.resolutionSummary = resolutionSummary
         this.projectName = projectName
         this.issueType = issueType
         this.status = status
