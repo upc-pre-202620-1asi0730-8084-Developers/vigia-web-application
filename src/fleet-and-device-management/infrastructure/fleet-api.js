@@ -19,6 +19,7 @@ export class FleetApi extends BaseApi {
 
     constructor() {
         super();
+        this.http.defaults.timeout = 15000;
         this.#vehiclesEndpoint = new BaseEndpoint(this, vehiclesEndpointPath);
         this.#geofencesEndpoint = new BaseEndpoint(this, geofencesEndpointPath);
         this.#telemetryEndpoint = new BaseEndpoint(this, telemetryEndpointPath);
@@ -60,6 +61,8 @@ export class FleetApi extends BaseApi {
      * @param {boolean} [params.isGpsPaired]
      * @returns {Promise<import('axios').AxiosResponse>}
      */
+    getProjects() { return this.http.get('/projects'); }
+
     getVehicles(params = {}) {
         return this.http.get(vehiclesEndpointPath, { params });
     }
