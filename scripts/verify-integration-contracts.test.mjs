@@ -17,3 +17,10 @@ test('dispatch UI completion and route arrival remain different contracts',()=>{
  assert.equal(route.dispatchId,'42');assert.equal(route.isActive,false);
  assert.equal(DispatchAssembler.toEntityFromResource({id:42,status:'IN_TRANSIT'}).status,'IN_TRANSIT');
 });
+
+test('device tracking retains the active dispatch, GPS and departure request after resource conversion',()=>{
+ const resource={id:9,dispatchId:'42',vehicleId:8,gpsDeviceId:'GPS-8',departureRequestId:'2ce653ea-f1d2-4b52-a4fd-996487885608',trackingSource:'DEVICE',trackingActive:true,status:'IN_TRANSIT',positions:[{latitude:0,longitude:0,speedKmh:20,reportedAt:'2026-11-24T12:00:00.123456Z'}]};
+ const entity=RouteAssembler.toEntityFromResource(resource);const saved=RouteAssembler.toResourceFromEntity(entity);
+ assert.equal(entity.isActive,true);for(const key of ['dispatchId','vehicleId','gpsDeviceId','departureRequestId','trackingSource','trackingActive'])assert.equal(saved[key],resource[key]);
+ assert.equal(saved.positions[0].latitude,0);assert.equal(saved.positions[0].reportedAt,resource.positions[0].reportedAt);
+});
