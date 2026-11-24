@@ -12,6 +12,7 @@ export const useDiscrepancyStore = defineStore('discrepancy', () => {
     const loadCases = async () => {
         loading.value = true
         error.value = null
+        cases.value = []
 
         try {
             cases.value = await discrepancyApi.getAllCases()

@@ -1,4 +1,5 @@
 <script setup>
+import ProtectedEvidencePhoto from '../../../discrepancy-and-evidence-management/presentation/components/protected-evidence-photo.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -48,7 +49,7 @@ function closeDialog() {
         >
           <div class="evidence-card surface-card border-1 surface-border border-round overflow-hidden">
             <div class="img-wrapper">
-              <img :src="ev.evidenceUrl" :alt="ev.caption" class="w-full gallery-img" />
+              <ProtectedEvidencePhoto :url="ev.evidenceUrl" :reception-id="reception.id" :caption="ev.caption" />
             </div>
             <div class="p-3">
               <p class="font-medium text-sm text-primary mb-1">{{ ev.caption }}</p>
@@ -75,7 +76,7 @@ function closeDialog() {
 }
 
 .img-wrapper {
-  height: 200px;
+  min-height: 200px;
   background-color: #111827;
   display: flex;
   align-items: center;
