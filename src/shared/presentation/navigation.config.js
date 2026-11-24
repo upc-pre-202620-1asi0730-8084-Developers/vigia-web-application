@@ -37,7 +37,7 @@ export const navigationItems = [
         labelKey: 'nav.orders',
         icon: 'pi pi-file-edit',
         path: '/solicitudes',
-        roles: [ROLES.WAREHOUSE_MANAGER]
+        roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER, ROLES.SITE_MANAGER]
     },
     {
         key: 'dispatches',

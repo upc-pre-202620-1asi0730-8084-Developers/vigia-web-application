@@ -827,6 +827,36 @@
         "changes": "Changes requested",
         "rejected": "Request rejected"
       }
+    },
+    "request": {
+      "new": "New material request",
+      "description": "Request materials for an assigned project. The warehouse will review your request.",
+      "information": "Request information",
+      "project": "Project",
+      "selectProject": "Select a project",
+      "date": "Request date",
+      "priority": "Priority",
+      "loading": "Loading assigned projects and materials…",
+      "retry": "Retry",
+      "empty": "No projects are assigned to your account. Contact the administrator.",
+      "noMaterials": "This project has no requestable materials. Contact the warehouse.",
+      "material": "Material {number}",
+      "selectMaterial": "Select a material",
+      "add": "Add material",
+      "remove": "Remove material {number}",
+      "send": "Send request",
+      "cancel": "Cancel",
+      "view": "View request {code}",
+      "errors": {
+        "catalog": "Unable to load the request catalog. Check the connection and retry.",
+        "invalid": "Choose a project and distinct materials with positive whole quantities.",
+        "forbidden": "You no longer have access to this project. Reload the catalog or contact the administrator.",
+        "submit": "Unable to submit the request. Check the values and connection, then retry."
+      },
+      "refresh": "Refresh requests",
+      "received": "New material requests received: {count}. Review pending requests.",
+      "awaiting": "Request submitted. Awaiting warehouse review.",
+      "acknowledged": "The warehouse has received this request."
     }
   },
   "dispatches": {
