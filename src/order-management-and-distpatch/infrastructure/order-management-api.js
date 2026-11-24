@@ -43,7 +43,7 @@ export class OrderManagementApi extends BaseApi {
      * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to the order response.
      */
     getOrderById(id) {
-        return this.#ordersEndpoint.getById(id);
+        return this.http.get(`${ordersEndpointPath}/${id}`, {timeout: 15000});
     }
 
     /**
@@ -73,11 +73,11 @@ export class OrderManagementApi extends BaseApi {
         if (latest.status === resource.status) return {data: latest};
         const event = resource.timeline?.at(-1);
         if (latest.status === 'PENDING' && ['APPROVED', 'REJECTED'].includes(resource.status)) {
-            await this.http.patch(`${ordersEndpointPath}/${resource.id}/status`, {status: 'UNDER_REVIEW', performedBy: 'Current user'});
+            await this.http.patch(`${ordersEndpointPath}/${resource.id}/status`, {status: 'UNDER_REVIEW', performedBy: 'Current user'}, {timeout: 15000});
         }
         return this.http.patch(`${ordersEndpointPath}/${resource.id}/status`, {
             status: resource.status, performedBy: 'Current user', description: event?.description || null
-        });
+        }, {timeout: 15000});
     }
 
     /**
@@ -104,6 +104,20 @@ export class OrderManagementApi extends BaseApi {
      */
     getDispatchById(id) {
         return this.#dispatchesEndpoint.getById(id);
+    }
+
+    getDispatchWeighings(id) {
+        return this.http.get(`${dispatchesEndpointPath}/${id}/weighing`);
+    }
+
+    recordDispatchWeighing(id, measurement) {
+        return this.http.post(`${dispatchesEndpointPath}/${id}/weighing`, measurement, {timeout: 15000});
+    }
+
+    assignDispatchVehicle(id, vehicle) {
+        return this.http.put(`${dispatchesEndpointPath}/${id}/vehicle`, {
+            vehicleId: Number(vehicle.id), vehiclePlate: vehicle.licensePlate, performedBy: 'Current user'
+        });
     }
 
     /**

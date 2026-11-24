@@ -21,7 +21,7 @@ const statusOptions = computed(() => [
 const filteredDispatches = computed(() => dispatches.value.filter(dispatch => {
   const q = search.value.trim().toLowerCase();
   const matchesStatus = status.value === 'ALL' || dispatch.status === status.value;
-  const matchesSearch = !q || [dispatch.id, dispatch.projectName, dispatch.items[0]?.material || ''].some(v => String(v).toLowerCase().includes(q));
+  const matchesSearch = !q || [dispatch.id, dispatch.code, dispatch.projectName, dispatch.items[0]?.material || ''].some(v => String(v).toLowerCase().includes(q));
   return matchesStatus && matchesSearch;
 }));
 
@@ -69,7 +69,16 @@ const mainQuantity = (dispatch) => {
         :rows="5"
         :rows-per-page-options="[5, 10, 20]"
     >
-      <pv-column field="id" :header="t('dispatches.table.id')" sortable />
+      <pv-column field="id" :header="t('dispatches.table.id')" sortable>
+        <template #body="{data}">{{ data.code || data.id }}</template>
+      </pv-column>
+      <pv-column :header="t('weighing.title')">
+        <template #body="{data}">
+          <div>{{ data.latestWeighing ? `${data.latestWeighing.weightKg} kg` : t('weighing.noWeight') }}</div>
+          <div v-if="data.requiresWeightReview">{{ t('weighing.review') }}</div>
+          <router-link :to="{name: 'ordering-dispatch-weighing', params: {id: data.id}}">{{ t('weighing.open') }}</router-link>
+        </template>
+      </pv-column>
       <pv-column field="projectName" :header="t('dispatches.table.work')" sortable />
       <pv-column :header="t('dispatches.table.materials')">
         <template #body="slotProps">{{ slotProps.data.items[0]?.material || '—' }}</template>

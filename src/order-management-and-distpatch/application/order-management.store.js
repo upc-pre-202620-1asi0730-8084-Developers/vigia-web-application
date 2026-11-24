@@ -134,16 +134,21 @@ const useOrderManagementStore = defineStore('orderManagement', () => {
     /**
      * Updates an existing order and synchronizes local state.
      * @param {Order} order - Order entity with updated data.
-     * @returns {void}
+     * @returns {Promise<Order>}
      */
-    function updateOrder(order) {
-        orderManagementApi.updateOrder(order).then(response => {
-            const updatedOrder = OrderAssembler.toEntityFromResource(response.data);
-            const index = orders.value.findIndex(o => o["id"] === updatedOrder.id);
-            if (index !== -1) orders.value[index] = updatedOrder;
-        }).catch(error => {
-            errors.value.push(error);
-        });
+    async function updateOrder(order) {
+        const updatedOrder = OrderAssembler.toEntityFromResource((await orderManagementApi.updateOrder(order)).data);
+        const index = orders.value.findIndex(o => String(o.id) === String(updatedOrder.id));
+        if (index !== -1) orders.value[index] = updatedOrder;
+        return updatedOrder;
+    }
+
+    async function fetchOrder(id) {
+        const order = OrderAssembler.toEntityFromResource((await orderManagementApi.getOrderById(id)).data);
+        const index = orders.value.findIndex(o => String(o.id) === String(id));
+        if (index < 0) orders.value.push(order);
+        else orders.value[index] = order;
+        return order;
     }
 
     /**
@@ -222,7 +227,33 @@ const useOrderManagementStore = defineStore('orderManagement', () => {
         });
     }
 
+    async function fetchDispatch(id) {
+        const dispatch = DispatchAssembler.toEntityFromResource((await orderManagementApi.getDispatchById(id)).data);
+        const index = dispatches.value.findIndex(d => String(d.id) === String(id));
+        if (index < 0) dispatches.value.push(dispatch);
+        else dispatches.value[index] = dispatch;
+        return dispatch;
+    }
+
+    async function fetchDispatchWeighings(id) {
+        return (await orderManagementApi.getDispatchWeighings(id)).data;
+    }
+
+    async function recordDispatchWeighing(id, measurement) {
+        return (await orderManagementApi.recordDispatchWeighing(id, measurement)).data;
+    }
+
+    async function assignDispatchVehicle(id, vehicle) {
+        await orderManagementApi.assignDispatchVehicle(id, vehicle);
+        return fetchDispatch(id);
+    }
+
     return {
+        fetchOrder,
+        fetchDispatch,
+        fetchDispatchWeighings,
+        recordDispatchWeighing,
+        assignDispatchVehicle,
         orders,
         dispatches,
         errors,

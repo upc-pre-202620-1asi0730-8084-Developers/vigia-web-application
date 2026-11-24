@@ -28,8 +28,12 @@ export class Dispatch {
      */
     constructor({ id = null, projectName = '', departureDate = '', estimatedTime = '', relatedOrderId = null,
                   dispatchType = 'DEPARTURE_TO_WORK', priority = 'AVERAGE', status = 'IN_PREPARATION',
-                  createdBy = '', createdAt = '', observations = '', items = [], vehicleId = null, vehiclePlate = null }) {
+                  createdBy = '', createdAt = '', observations = '', items = [], vehicleId = null, vehiclePlate = null,
+                  code = '', latestWeighing = null, requiresWeightReview = true }) {
         this.id = id;
+        this.code = code;
+        this.latestWeighing = latestWeighing;
+        this.requiresWeightReview = requiresWeightReview;
         this.projectName = projectName;
         this.departureDate = departureDate;
         this.estimatedTime = estimatedTime;
