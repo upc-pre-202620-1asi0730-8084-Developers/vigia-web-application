@@ -3,11 +3,18 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useReceptionStore } from '../../application/reception.store.js';
 import { RECEPTION_STATUS } from '../../domain/reception-status.js';
+import { canActorEditReception } from '../../domain/reception-verification.js';
+import useIamStore from '../../../iam/application/iam.store.js';
+import ProtectedEvidencePhoto from '../../../discrepancy-and-evidence-management/presentation/components/protected-evidence-photo.vue';
 
 const emit = defineEmits(['reportDiscrepancy', 'confirmReception', 'viewGallery']);
 
 const { t } = useI18n();
 const receptionStore = useReceptionStore();
+const iamStore = useIamStore();
+
+const canActSelected = computed(() =>
+  canActorEditReception(selectedItem.value, iamStore.currentUserId, iamStore.currentRole));
 
 // Filtros
 const selectedProject = ref('all');
@@ -93,9 +100,9 @@ function getStatusLabel(status) {
         <div class="kpi-info">
           <span class="kpi-label">{{ t('receptions.supervisor.kpiToday') }}</span>
           <div class="kpi-value-row">
-            <span class="kpi-value">12</span>
+            <span class="kpi-value">{{ receptionStore.todayReceptionsCount }}</span>
             <span class="kpi-trend trend-up">
-              <i class="pi pi-arrow-up text-xs mr-1"></i>+33% {{ t('receptions.supervisor.vsPrevDay') }}
+              <i class="pi pi-arrow-up text-xs mr-1"></i>{{ t('receptions.supervisor.vsPrevDay') }}
             </span>
           </div>
         </div>
@@ -109,9 +116,9 @@ function getStatusLabel(status) {
         <div class="kpi-info">
           <span class="kpi-label">{{ t('receptions.supervisor.kpiPending') }}</span>
           <div class="kpi-value-row">
-            <span class="kpi-value">5</span>
+            <span class="kpi-value">{{ receptionStore.pendingCount }}</span>
             <span class="kpi-trend trend-up">
-              <i class="pi pi-arrow-up text-xs mr-1"></i>+67% {{ t('receptions.supervisor.vsPrevDay') }}
+              <i class="pi pi-arrow-up text-xs mr-1"></i>{{ t('receptions.supervisor.vsPrevDay') }}
             </span>
           </div>
         </div>
@@ -125,9 +132,9 @@ function getStatusLabel(status) {
         <div class="kpi-info">
           <span class="kpi-label">{{ t('receptions.supervisor.kpiDiscrepancies') }}</span>
           <div class="kpi-value-row">
-            <span class="kpi-value">3</span>
+            <span class="kpi-value">{{ receptionStore.discrepantCount }}</span>
             <span class="kpi-trend trend-up">
-              <i class="pi pi-arrow-up text-xs mr-1"></i>+50% {{ t('receptions.supervisor.vsPrevDay') }}
+              <i class="pi pi-arrow-up text-xs mr-1"></i>{{ t('receptions.supervisor.vsPrevDay') }}
             </span>
           </div>
         </div>
@@ -141,9 +148,9 @@ function getStatusLabel(status) {
         <div class="kpi-info">
           <span class="kpi-label">{{ t('receptions.supervisor.kpiCompleted') }}</span>
           <div class="kpi-value-row">
-            <span class="kpi-value">18</span>
+            <span class="kpi-value">{{ receptionStore.completedCount }}</span>
             <span class="kpi-trend trend-up">
-              <i class="pi pi-arrow-up text-xs mr-1"></i>+29% {{ t('receptions.supervisor.vsPrevDay') }}
+              <i class="pi pi-arrow-up text-xs mr-1"></i>{{ t('receptions.supervisor.vsPrevDay') }}
             </span>
           </div>
         </div>
@@ -244,7 +251,7 @@ function getStatusLabel(status) {
                 <td class="text-secondary text-xs">
                   {{ new Date(rec.arrivedAt).toLocaleDateString() }} {{ new Date(rec.arrivedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
                 </td>
-                <td>{{ rec.verifiedByUserName || 'Ana López' }}</td>
+                <td>{{ rec.verifiedByUserName || '-' }}</td>
                 <td>
                   <span class="status-pill" :class="getStatusBadgeClass(rec.status)">
                     <span class="status-dot"></span>
@@ -307,7 +314,7 @@ function getStatusLabel(status) {
           </div>
           <div class="meta-item">
             <span class="meta-k">{{ t('receptions.supervisor.colReceivedBy') }}</span>
-            <span class="meta-v">{{ selectedItem.verifiedByUserName || 'Ana López' }}</span>
+            <span class="meta-v">{{ selectedItem.verifiedByUserName || '-' }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-k">{{ t('receptions.supervisor.colStatus') }}</span>
@@ -364,13 +371,14 @@ function getStatusLabel(status) {
             </a>
           </div>
           <div class="flex gap-2">
-            <img
+            <div
               v-for="ev in selectedItem.evidences.slice(0, 3)"
               :key="ev.id"
-              :src="ev.evidenceUrl"
-              class="thumb-img border-round cursor-pointer"
+              class="thumb-img border-round overflow-hidden cursor-pointer"
               @click="emit('viewGallery', selectedItem)"
-            />
+            >
+              <ProtectedEvidencePhoto :url="ev.evidenceUrl" :reception-id="selectedItem.id" :caption="ev.caption" />
+            </div>
           </div>
         </div>
 
@@ -380,12 +388,14 @@ function getStatusLabel(status) {
             :label="t('receptions.supervisor.reportDiscrepancy')"
             icon="pi pi-camera"
             class="btn-secondary w-full"
+            :disabled="!canActSelected"
             @click="emit('reportDiscrepancy', selectedItem)"
           />
           <pv-button
             :label="t('receptions.supervisor.confirmReception')"
             icon="pi pi-check"
             class="btn-accent w-full"
+            :disabled="!canActSelected"
             @click="emit('confirmReception', selectedItem)"
           />
         </div>
@@ -704,8 +714,19 @@ function getStatusLabel(status) {
 .thumb-img {
   width: 60px;
   height: 48px;
-  object-fit: cover;
   border: 1px solid #E5E7EB;
+  background-color: #F8FAFC;
+}
+
+.thumb-img :deep(.protected-photo img) {
+  width: 60px;
+  height: 48px;
+  object-fit: cover;
+}
+
+.thumb-img :deep(.protected-photo a),
+.thumb-img :deep(.protected-photo p) {
+  display: none;
 }
 
 @media (max-width: 1024px) {

@@ -747,9 +747,20 @@
       "observations": "Observaciones en obra",
       "observationsPlaceholder": "Anota cualquier detalle sobre la descarga o condiciones del material...",
       "saveAction": "Confirmar y registrar",
-      "requiredFields": "Por favor completa el ID de despacho y número de guía.",
+      "requiredFields": "Selecciona un despacho en camino con guía de remisión válida.",
+      "noUpcomingArrivals": "No hay despachos en tránsito asignados a tus obras pendientes de recepción.",
+      "lockedGuideHelp": "Los datos del despacho y la guía provienen del servidor y no pueden alterarse.",
       "errorSaving": "Ocurrió un error al registrar la recepción.",
       "saved": "Recepción registrada"
+    },
+    "errors": {
+      "forbidden": "No tienes permisos para acceder o modificar la recepción de esta obra.",
+      "notFound": "La recepción solicitada no existe o no pertenece a tus obras asignadas.",
+      "invalidGuide": "La guía de remisión no coincide con la guía emitida para el despacho.",
+      "duplicateReception": "Este despacho ya tiene una recepción registrada. Actualiza la vista para ver su estado.",
+      "conflict": "La recepción cambió en el servidor o ya fue cerrada. Actualiza antes de continuar.",
+      "validation": "Revisa las cantidades recibidas y los campos obligatorios antes de continuar.",
+      "networkUncertain": "Sin respuesta del servidor. Conservamos la solicitud para que puedas reintentar sin duplicar registros."
     },
     "discrepancy": {
       "title": "Reportar discrepancia en recepción",
@@ -1102,6 +1113,8 @@
     "reload": "Actualizar recepción",
     "missing": "No se pudo cargar esta recepción para tu cuenta.",
     "reported": "Discrepancia reportada.",
+    "uncertainReport": "No se confirmó el envío. Conservamos la solicitud para reintentar sin duplicar el caso.",
+    "viewCase": "Ver caso vinculado",
     "back": "Volver a recepciones"
   }
 }

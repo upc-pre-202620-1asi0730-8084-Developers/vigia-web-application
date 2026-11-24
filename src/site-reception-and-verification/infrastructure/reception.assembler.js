@@ -136,6 +136,7 @@ export class ReceptionAssembler {
         return {
             id: entity.id,
             dispatchId: entity.dispatchId,
+            requestId: entity.requestId ?? null,
             verifiedByUserId: entity.verifiedByUserId,
             verifiedByUserName: entity.verifiedByUserName,
             siteId: entity.siteId,
