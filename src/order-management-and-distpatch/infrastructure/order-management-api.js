@@ -55,6 +55,14 @@ export class OrderManagementApi extends BaseApi {
         return this.#ordersEndpoint.create(resource);
     }
 
+    getRequestCatalog() {
+        return this.http.get(`${ordersEndpointPath}/request-catalog`);
+    }
+
+    submitMaterialRequest(resource) {
+        return this.http.post(`${ordersEndpointPath}/requests`, resource);
+    }
+
     /**
      * Updates a order resource.
      * @param {Object} resource - Order resource payload (must include id).

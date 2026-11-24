@@ -827,6 +827,36 @@
         "changes": "Se solicitaron cambios",
         "rejected": "Solicitud rechazada"
       }
+    },
+    "request": {
+      "new": "Nuevo pedido de materiales",
+      "description": "Solicita materiales para una obra asignada. El almacén revisará tu pedido.",
+      "information": "Información del pedido",
+      "project": "Obra",
+      "selectProject": "Selecciona una obra",
+      "date": "Fecha del pedido",
+      "priority": "Prioridad",
+      "loading": "Cargando obras y materiales asignados…",
+      "retry": "Reintentar",
+      "empty": "No tienes obras asignadas. Contacta al administrador.",
+      "noMaterials": "Esta obra no tiene materiales disponibles para solicitar. Contacta al almacén.",
+      "material": "Material {number}",
+      "selectMaterial": "Selecciona un material",
+      "add": "Agregar material",
+      "remove": "Quitar material {number}",
+      "send": "Enviar pedido",
+      "cancel": "Cancelar",
+      "view": "Ver pedido {code}",
+      "errors": {
+        "catalog": "No se pudo cargar el catálogo. Revisa la conexión y reintenta.",
+        "invalid": "Selecciona una obra y materiales distintos con cantidades enteras positivas.",
+        "forbidden": "Ya no tienes acceso a esta obra. Recarga el catálogo o contacta al administrador.",
+        "submit": "No se pudo enviar el pedido. Revisa los datos y la conexión e inténtalo otra vez."
+      },
+      "refresh": "Actualizar pedidos",
+      "received": "Nuevos pedidos recibidos: {count}. Revisa los pedidos pendientes.",
+      "awaiting": "Pedido enviado. Pendiente de revisión del almacén.",
+      "acknowledged": "Pedido recibido por el almacén."
     }
   },
   "dispatches": {

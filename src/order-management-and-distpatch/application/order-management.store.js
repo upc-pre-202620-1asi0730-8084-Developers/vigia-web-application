@@ -115,18 +115,20 @@ const useOrderManagementStore = defineStore('orderManagement', () => {
         return orders.value.find(order => String(order["id"]) === String(id));
     }
 
+    async function fetchRequestCatalog() {
+        return (await orderManagementApi.getRequestCatalog()).data;
+    }
+
     /**
-     * Creates an order through infrastructure and appends it to local state.
-     * @param {Order} order - Order entity to persist.
-     * @returns {void}
+     * Submits a material request and appends the persisted order to local state.
+     * @param {Object} order - Request with project and material identifiers.
+     * @returns {Promise<Order>}
      */
-    function addOrder(order) {
-        orderManagementApi.createOrder(order).then(response => {
-            const newOrder = OrderAssembler.toEntityFromResource(response.data);
-            orders.value.push(newOrder);
-        }).catch(error => {
-            errors.value.push(error);
-        });
+    async function addOrder(order) {
+        const response = await orderManagementApi.submitMaterialRequest(order);
+        const newOrder = OrderAssembler.toEntityFromResource(response.data);
+        orders.value.unshift(newOrder);
+        return newOrder;
     }
 
     /**
@@ -237,6 +239,7 @@ const useOrderManagementStore = defineStore('orderManagement', () => {
         inTransitCount,
         withIncidentCount,
         fetchOrders,
+        fetchRequestCatalog,
         fetchDispatches,
         getOrderById,
         addOrder,

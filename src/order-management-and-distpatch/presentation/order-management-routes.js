@@ -7,10 +7,12 @@ const dispatchList = () => import('./views/dispatch-list.vue');
 const dispatchForm = () => import('./views/dispatch-form.vue');
 
 const roles = [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER];
+const orderRoles = [...roles, ROLES.SITE_MANAGER];
 
 const orderManagementRoutes = [
-    {   path: '/solicitudes',       name: 'ordering-orders',        component: orderList,      meta: {title: 'Solicitudes', roles}},
-    {   path: '/solicitudes/:id',   name: 'ordering-order-detail',  component: orderDetail,    meta: {title: 'Detalle de solicitud', roles}},
+    {   path: '/solicitudes',       name: 'ordering-orders',        component: orderList,      meta: {title: 'Solicitudes', roles: orderRoles}},
+    {   path: '/solicitudes/nueva', name: 'ordering-order-new', component: () => import('./views/order-form.vue'), meta: {title: 'Nuevo pedido', roles: [ROLES.ADMIN, ROLES.SITE_MANAGER]}},
+    {   path: '/solicitudes/:id',   name: 'ordering-order-detail',  component: orderDetail,    meta: {title: 'Detalle de solicitud', roles: orderRoles}},
     {   path: '/despachos',         name: 'ordering-dispatches',    component: dispatchList,   meta: {title: 'Despachos', roles}},
     {   path: '/despachos/nuevo',   name: 'ordering-dispatch-new',  component: dispatchForm,   meta: {title: 'Nuevo despacho', roles}}
 ];
