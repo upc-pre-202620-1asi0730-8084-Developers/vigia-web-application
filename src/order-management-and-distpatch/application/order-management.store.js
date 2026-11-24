@@ -222,7 +222,32 @@ const useOrderManagementStore = defineStore('orderManagement', () => {
         });
     }
 
+    async function fetchDispatch(id) {
+        const dispatch = DispatchAssembler.toEntityFromResource((await orderManagementApi.getDispatchById(id)).data);
+        const index = dispatches.value.findIndex(d => String(d.id) === String(id));
+        if (index < 0) dispatches.value.push(dispatch);
+        else dispatches.value[index] = dispatch;
+        return dispatch;
+    }
+
+    async function fetchDispatchWeighings(id) {
+        return (await orderManagementApi.getDispatchWeighings(id)).data;
+    }
+
+    async function recordDispatchWeighing(id, measurement) {
+        return (await orderManagementApi.recordDispatchWeighing(id, measurement)).data;
+    }
+
+    async function assignDispatchVehicle(id, vehicle) {
+        await orderManagementApi.assignDispatchVehicle(id, vehicle);
+        return fetchDispatch(id);
+    }
+
     return {
+        fetchDispatch,
+        fetchDispatchWeighings,
+        recordDispatchWeighing,
+        assignDispatchVehicle,
         orders,
         dispatches,
         errors,

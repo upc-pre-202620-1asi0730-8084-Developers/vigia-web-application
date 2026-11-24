@@ -106,6 +106,20 @@ export class OrderManagementApi extends BaseApi {
         return this.#dispatchesEndpoint.getById(id);
     }
 
+    getDispatchWeighings(id) {
+        return this.http.get(`${dispatchesEndpointPath}/${id}/weighing`);
+    }
+
+    recordDispatchWeighing(id, measurement) {
+        return this.http.post(`${dispatchesEndpointPath}/${id}/weighing`, measurement, {timeout: 15000});
+    }
+
+    assignDispatchVehicle(id, vehicle) {
+        return this.http.put(`${dispatchesEndpointPath}/${id}/vehicle`, {
+            vehicleId: Number(vehicle.id), vehiclePlate: vehicle.licensePlate, performedBy: 'Current user'
+        });
+    }
+
     /**
      * Creates a dispatch resource.
      * @param {Object} resource - Dispatch resource payload.

@@ -8,7 +8,8 @@ export const DISPATCH_STATUS = {
     IN_TRANSIT: 'IN_TRANSIT',
     NEAR_SITE: 'NEAR_SITE',
     DELIVERED: 'DELIVERED',
-    WITH_INCIDENT: 'WITH_INCIDENT'
+    WITH_INCIDENT: 'WITH_INCIDENT',
+    CANCELLED: 'CANCELLED'
 };
 
 /**
@@ -46,6 +47,7 @@ export function dispatchStatusSeverity(status) {
         case DISPATCH_STATUS.DELIVERED:
             return 'success';
         case DISPATCH_STATUS.WITH_INCIDENT:
+        case DISPATCH_STATUS.CANCELLED:
             return 'danger';
         case DISPATCH_STATUS.SCHEDULED:
             return 'secondary';

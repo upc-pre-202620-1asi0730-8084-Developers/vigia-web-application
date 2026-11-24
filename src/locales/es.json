@@ -892,7 +892,8 @@
       "IN_TRANSIT": "En tránsito",
       "NEAR_SITE": "Cerca de obra",
       "DELIVERED": "Entregado",
-      "WITH_INCIDENT": "Con incidencia"
+      "WITH_INCIDENT": "Con incidencia",
+      "CANCELLED": "Cancelado"
     },
     "priority": {
       "HIGH": "Alta",
@@ -942,6 +943,28 @@
       "title": "Crear cuenta",
       "subtitle": "Ingresa los datos requeridos para registrarte."
     }
+  },
+  "weighing": {
+    "title": "Pesaje neto", "open": "Ver pesaje", "noWeight": "Sin pesaje", "back": "Volver a despachos",
+    "description": "Registra únicamente el peso neto de los materiales en kg. El almacén indica el peso esperado y la tolerancia; no se convierten unidades de materiales a kg.",
+    "review": "Requiere revisión del peso", "saved": "Pesaje guardado correctamente.", "loading": "Cargando despacho e historial…", "reload": "Actualizar datos",
+    "missing": "El despacho no existe.", "forbidden": "Tu cuenta no tiene permiso para acceder al pesaje.",
+    "loadError": "No se pudieron actualizar los datos. Si aparece la confirmación de guardado, el pesaje ya fue registrado. Actualiza para consultar el historial.",
+    "vehicleError": "No se pudo cargar o asignar el vehículo. Actualiza los datos antes de volver a intentar.",
+    "closed": "Solo se pueden registrar nuevos pesajes mientras el despacho está en preparación.",
+    "vehicle": "Vehículo", "assign": "Asignar vehículo", "needVehicle": "Asigna un vehículo antes de registrar el pesaje.",
+    "record": "Registrar pesaje", "precision": "Completa los tres valores en kg, con un máximo de tres decimales. La tolerancia es un margen absoluto y puede ser cero.",
+    "weightKg": "Peso neto (kg)", "expectedWeightKg": "Peso esperado (kg)", "toleranceKg": "Tolerancia (kg)",
+    "save": "Guardar pesaje", "retry": "Reintentar el mismo pesaje", "history": "Historial de pesajes", "empty": "Aún no hay pesajes registrados.",
+    "pending": "Hay un envío pendiente de confirmar. Se conservan sus valores y su identificador para reintentarlo sin duplicarlo, incluso después de recargar la página.",
+    "invalid": "Indica pesos mayores que cero y una tolerancia igual o mayor que cero, con hasta tres decimales y un máximo de 999999999.999 kg.",
+    "storageError": "El navegador no permite guardar el identificador del envío. Habilita el almacenamiento de sesión antes de continuar.",
+    "uncertain": "No se pudo confirmar el resultado del envío. Usa Reintentar el mismo pesaje para consultar o completar esa misma operación.",
+    "conflict": "El despacho cambió o la solicitud entra en conflicto con un registro existente. Actualiza y revisa el historial antes de enviar otro pesaje.",
+    "saveError": "El servidor rechazó el pesaje. Actualiza los datos, verifica los valores y vuelve a intentar.",
+    "stale": "Este pesaje corresponde a una carga o vehículo anterior; se necesita un nuevo pesaje.",
+    "difference": "Diferencia neto − esperado", "operator": "Registrado por", "date": "Fecha y hora",
+    "comparison": {"NOT_EVALUATED": "Sin comparación", "WITHIN_TOLERANCE": "Dentro de tolerancia", "OUTSIDE_TOLERANCE": "Fuera de tolerancia"}
   },
   "errors": {
     "occurred": "Ocurrieron errores"

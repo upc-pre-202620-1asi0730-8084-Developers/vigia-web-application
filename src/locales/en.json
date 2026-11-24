@@ -892,7 +892,8 @@
       "IN_TRANSIT": "In transit",
       "NEAR_SITE": "Near work",
       "DELIVERED": "Delivered",
-      "WITH_INCIDENT": "With incidence"
+      "WITH_INCIDENT": "With incidence",
+      "CANCELLED": "Cancelled"
     },
     "priority": {
       "HIGH": "High",
@@ -942,6 +943,28 @@
       "title": "Sign Up",
       "subtitle": "Please enter the required information to sign up."
     }
+  },
+  "weighing": {
+    "title": "Net weighing", "open": "View weighing", "noWeight": "No weighing", "back": "Back to dispatches",
+    "description": "Record only the net weight of materials in kg. The warehouse provides the expected weight and tolerance; material units are not converted to kg.",
+    "review": "Weight review required", "saved": "Weighing saved successfully.", "loading": "Loading dispatch and history…", "reload": "Refresh data",
+    "missing": "The dispatch does not exist.", "forbidden": "Your account does not have permission to access weighing.",
+    "loadError": "Data could not be refreshed. If the save confirmation is shown, the weighing was already recorded. Refresh to view the history.",
+    "vehicleError": "The vehicle could not be loaded or assigned. Refresh the data before trying again.",
+    "closed": "New weighings can only be recorded while the dispatch is in preparation.",
+    "vehicle": "Vehicle", "assign": "Assign vehicle", "needVehicle": "Assign a vehicle before recording the weighing.",
+    "record": "Record weighing", "precision": "Complete all three values in kg, with up to three decimal places. Tolerance is an absolute margin and can be zero.",
+    "weightKg": "Net weight (kg)", "expectedWeightKg": "Expected weight (kg)", "toleranceKg": "Tolerance (kg)",
+    "save": "Save weighing", "retry": "Retry the same weighing", "history": "Weighing history", "empty": "No weighings have been recorded yet.",
+    "pending": "A submission is awaiting confirmation. Its values and identifier are retained to retry without duplicating it, including after a page reload.",
+    "invalid": "Enter positive weights and a nonnegative tolerance, with up to three decimal places and a maximum of 999999999.999 kg.",
+    "storageError": "The browser cannot store the submission identifier. Enable session storage before continuing.",
+    "uncertain": "The submission result could not be confirmed. Use Retry the same weighing to check or complete that same operation.",
+    "conflict": "The dispatch changed or the request conflicts with an existing record. Refresh and check the history before submitting another weighing.",
+    "saveError": "The server rejected the weighing. Refresh the data, verify the values and try again.",
+    "stale": "This weighing belongs to an earlier load or vehicle; a new weighing is needed.",
+    "difference": "Net − expected difference", "operator": "Recorded by", "date": "Date and time",
+    "comparison": {"NOT_EVALUATED": "Not evaluated", "WITHIN_TOLERANCE": "Within tolerance", "OUTSIDE_TOLERANCE": "Outside tolerance"}
   },
   "errors": {
     "occurred": "Errors occurred"
