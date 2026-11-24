@@ -1116,5 +1116,49 @@
     "uncertainReport": "No se confirmó el envío. Conservamos la solicitud para reintentar sin duplicar el caso.",
     "viewCase": "Ver caso vinculado",
     "back": "Volver a recepciones"
+  },
+  "pageTitles": {
+    "transportation_and_fleet": "Transporte y Flota",
+    "register_vehicle": "Registrar unidad",
+    "pair_gps_device": "Vincular dispositivo GPS",
+    "site_receptions": "Recepciones en Obra",
+    "register_reception": "Registrar recepción",
+    "report_discrepancy": "Reportar discrepancia",
+    "page_not_found": "Página no encontrada",
+    "audit_log": "Historial",
+    "home": "Inicio",
+    "issues": "Problemas",
+    "issue_details": "Detalle del problema",
+    "sign_in": "Iniciar sesión",
+    "sign_up": "Registrarse",
+    "settings": "Configuración",
+    "materials": "Materiales",
+    "start_trip": "Inicio de traslado",
+    "delivery_guide": "Guía de despacho",
+    "weighing": "Pesaje",
+    "material_orders": "Solicitudes",
+    "new_order": "Nuevo pedido",
+    "order_details": "Detalle de solicitud",
+    "dispatches": "Despachos",
+    "new_dispatch": "Nuevo despacho",
+    "job_sites": "Obras"
+  },
+  "a11y": {
+    "skip": "Saltar al contenido principal",
+    "breadcrumb": "Migas de pan",
+    "profile": "Perfil de usuario",
+    "primaryNav": "Navegación principal",
+    "modules": "Módulos de la aplicación",
+    "mobileNav": "Navegación móvil",
+    "platform": "Plataforma"
+  },
+  "authErrors": {
+    "credentials": "Usuario o contraseña incorrectos.",
+    "forbidden": "No tienes permiso para acceder a este recurso.",
+    "username": "Ese usuario ya está registrado.",
+    "validation": "Revisa los datos. La contraseña debe tener al menos 10 caracteres.",
+    "rateLimit": "Demasiados intentos. Espera un minuto y vuelve a intentar.",
+    "connection": "No se pudo conectar con la API. Revisa tu conexión y vuelve a intentar.",
+    "server": "El servicio no pudo completar la solicitud. Intenta más tarde."
   }
 }

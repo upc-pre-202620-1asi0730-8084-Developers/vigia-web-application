@@ -4,7 +4,7 @@ import {ROLES} from "../../shared/presentation/navigation.config.js";
 const homeView = () => import('./views/home-view.vue');
 
 const dashboardRoutes = [
-    {   path: '/inicio',   name: 'home',   component: homeView,   meta: {title: 'Inicio', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER, ROLES.SITE_MANAGER]}}
+    {   path: '/inicio',   name: 'home',   component: homeView,   meta: {titleKey: 'pageTitles.home', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER, ROLES.SITE_MANAGER]}}
 ];
 
 export default dashboardRoutes;

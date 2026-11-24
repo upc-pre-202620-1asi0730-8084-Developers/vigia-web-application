@@ -4,7 +4,7 @@ import {ROLES} from "../../shared/presentation/navigation.config.js";
 const activityLog = () => import('./views/activity-log.vue');
 
 const activityHistoryRoutes = [
-    {   path: '/historial',   name: 'history',   component: activityLog,   meta: {title: 'Historial', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER, ROLES.SITE_MANAGER]}}
+    {   path: '/historial',   name: 'history',   component: activityLog,   meta: {titleKey: 'pageTitles.audit_log', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER, ROLES.SITE_MANAGER]}}
 ];
 
 export default activityHistoryRoutes;

@@ -1116,5 +1116,49 @@
     "uncertainReport": "Confirmation was not received. Your request is preserved so you can retry safely without duplicating the case.",
     "viewCase": "View linked case",
     "back": "Back to receptions"
+  },
+  "pageTitles": {
+    "transportation_and_fleet": "Transportation and fleet",
+    "register_vehicle": "Register vehicle",
+    "pair_gps_device": "Pair GPS device",
+    "site_receptions": "Site receptions",
+    "register_reception": "Register reception",
+    "report_discrepancy": "Report discrepancy",
+    "page_not_found": "Page not found",
+    "audit_log": "Audit log",
+    "home": "Home",
+    "issues": "Issues",
+    "issue_details": "Issue details",
+    "sign_in": "Sign in",
+    "sign_up": "Sign up",
+    "settings": "Settings",
+    "materials": "Materials",
+    "start_trip": "Start trip",
+    "delivery_guide": "Delivery guide",
+    "weighing": "Weighing",
+    "material_orders": "Material orders",
+    "new_order": "New order",
+    "order_details": "Order details",
+    "dispatches": "Dispatches",
+    "new_dispatch": "New dispatch",
+    "job_sites": "Job sites"
+  },
+  "a11y": {
+    "skip": "Skip to main content",
+    "breadcrumb": "Breadcrumb",
+    "profile": "User profile",
+    "primaryNav": "Primary navigation",
+    "modules": "Application modules",
+    "mobileNav": "Mobile navigation",
+    "platform": "Platform"
+  },
+  "authErrors": {
+    "credentials": "Invalid username or password.",
+    "forbidden": "You do not have permission to access this resource.",
+    "username": "That username is already registered.",
+    "validation": "Check the entered values. The password must have at least 10 characters.",
+    "rateLimit": "Too many attempts. Wait a minute and try again.",
+    "connection": "Could not connect to the API. Check your connection and try again.",
+    "server": "The service could not complete your request. Try again later."
   }
 }

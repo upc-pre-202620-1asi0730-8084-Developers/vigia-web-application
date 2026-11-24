@@ -136,7 +136,7 @@ async function report() {
 }
 </script>
 <template>
-  <main class="report-evidence" :aria-busy="loading || busy">
+  <section class="report-evidence" :aria-busy="loading || busy">
     <pv-button :label="t('evidenceFiles.back')" :disabled="busy" @click="router.back()" />
     <h1>{{ t('evidenceFiles.report') }}</h1>
     <p v-if="error" role="alert">{{ t(`evidenceFiles.${error}`) }}</p>
@@ -159,10 +159,10 @@ async function report() {
       </div>
       <template v-if="!reported && !closed">
         <label for="discrepancy-observations">{{ t('evidenceFiles.observations') }}</label>
-        <textarea id="discrepancy-observations" v-model="observations" maxlength="2000" :disabled="busy" rows="4" />
+        <textarea id="discrepancy-observations" v-model="observations" maxlength="500" :disabled="busy" rows="4" />
         <pv-button :label="t('evidenceFiles.report')" :loading="submitting" :disabled="busy || !photos.length || !observations.trim()" @click="report" />
       </template>
     </template>
-  </main>
+  </section>
 </template>
 <style scoped>.report-evidence{display:grid;gap:1rem;max-width:960px;margin:1rem auto;padding:1rem}.photos{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}textarea{width:100%;box-sizing:border-box}</style>

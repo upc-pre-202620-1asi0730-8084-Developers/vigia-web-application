@@ -14,7 +14,7 @@ const { t } = useI18n();
       <p class="m-0 line-height-3 text-color-secondary">
         {{ t('page-not-found.content', { 'unavailable-route': unavailableRoute }) }}
       </p>
-      <router-link to="/home" class="text-primary font-medium">
+      <router-link to="/inicio" class="text-primary font-medium">
         {{ t('page-not-found.go-home') }}
       </router-link>
     </div>

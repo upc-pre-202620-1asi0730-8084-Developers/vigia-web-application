@@ -4,7 +4,7 @@ import {ROLES} from "../../shared/presentation/navigation.config.js";
 const settingsView = () => import('./views/settings-view.vue');
 
 const settingsRoutes = [
-    {   path: '/configuracion',   name: 'settings',   component: settingsView,   meta: {title: 'Configuración', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER, ROLES.SITE_MANAGER]}}
+    {   path: '/configuracion',   name: 'settings',   component: settingsView,   meta: {titleKey: 'pageTitles.settings', roles: [ROLES.ADMIN, ROLES.WAREHOUSE_MANAGER, ROLES.SITE_MANAGER]}}
 ];
 
 export default settingsRoutes;

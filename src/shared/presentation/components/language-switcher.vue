@@ -1,7 +1,7 @@
 <script setup>
   import {watch} from "vue";
   import {useI18n} from "vue-i18n";
-  import {LOCALE_STORAGE_KEY} from "../../../i18n.js";
+  import {saveLocale} from "../locale-policy.js";
 
   const { locale, availableLocales, t } = useI18n();
 
@@ -9,7 +9,7 @@
   watch(locale, value => {
     document.documentElement.lang = value;
     try {
-      localStorage.setItem(LOCALE_STORAGE_KEY, value);
+      saveLocale(localStorage, value);
     } catch {
       // Storage may be unavailable (private mode); the language still changes for this visit.
     }

@@ -1,0 +1,36 @@
+{
+  "task": 17,
+  "dateLocal": "2026-11-24",
+  "owner": "Elias",
+  "githubAccount": "eliocerdan",
+  "branch": "fix/i18n-accessibility",
+  "status": "Implemented and locally verified",
+  "scope": "Frontend shared navigation, language policy, auth feedback and targeted case/reception accessibility. Backend remains at row16.",
+  "changes": [
+    "Fresh visit starts English; saved ES/EN preference wins; invalid/prototype keys and blocked storage fall back safely.",
+    "Page titles, document language and navigation accessible names follow the active locale. Route guards now return values without deprecated next callback.",
+    "Sign-in/sign-up errors use stable translated keys for401/403/409/400/429/network/server. Previous auth error clears between forms.",
+    "Skip-to-main link, route content focus, keyboard profile disclosure with Escape/focus restoration and visible focus indicator.",
+    "Auth fields have names, required/invalid states, error descriptions and autocomplete. Targeted receipt fields and quantity controls have accessible names.",
+    "Receipt report has one main landmark through shared layout; description is capped at backend500characters. Failed case/report actions surface localized alerts."
+  ],
+  "verification": {
+    "frontendTests": 30,
+    "newTests": 5,
+    "build": "Pass; existing large-chunk warning remains",
+    "catalogs": "Matching leaf keys and interpolation placeholders across en/es; every route title has both translations",
+    "browser": [
+      "Fresh origin5181 starts English with matching document lang/title",
+      "Spanish selection survives reload; switching English updates existing invalid-credentials alert",
+      "Real local API401 shows localized credentials message",
+      "Enter on skip link focuses main-content; Tab reaches username then password; focus-visible and describedby verified",
+      "Enter opens profile disclosure and focuses first action; Escape closes and returns focus to trigger",
+      "Keyboard route change Sign-In/Sign-Up updates title and focuses main-content; one main landmark; old auth alert cleared"
+    ]
+  },
+  "limits": [
+    "Focused browser checks and code/automated checks; no claim of full WCAG certification or assistive-technology audit.",
+    "Andre A12 full receipt/landing usability review and final per-role regression remain separate.",
+    "No new backend behavior, production deployment or release."
+  ]
+}

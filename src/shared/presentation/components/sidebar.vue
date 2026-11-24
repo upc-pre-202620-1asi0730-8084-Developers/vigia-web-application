@@ -45,7 +45,7 @@ const navigateFromMore = (path) => {
 
 <template>
   <!-- Barra lateral Desktop (>960px, §4.2.5) con la identidad de los mockups de Figma -->
-  <aside class="vigia-sidebar-desktop" aria-label="Navegación principal">
+  <aside class="vigia-sidebar-desktop" :aria-label="t('a11y.primaryNav')">
     <!-- Header de Marca: Logo Vigia con acento amarillo y subtítulo BUILDS WITH VISION -->
     <div class="sidebar-header">
       <div class="brand-container">
@@ -61,7 +61,7 @@ const navigateFromMore = (path) => {
     </div>
 
     <!-- Lista de navegación con píldora amarilla sólida para el item activo -->
-    <nav class="sidebar-nav" aria-label="Módulos de la aplicación">
+    <nav class="sidebar-nav" :aria-label="t('a11y.modules')">
       <ul class="nav-list">
         <li v-for="item in allowedItems" :key="item.key" class="nav-item-wrapper">
           <router-link
@@ -88,7 +88,7 @@ const navigateFromMore = (path) => {
   </aside>
 
   <!-- Barra inferior Mobile y Tablet (<960px, §4.2.5) -->
-  <nav class="vigia-bottom-bar" aria-label="Navegación móvil">
+  <nav class="vigia-bottom-bar" :aria-label="t('a11y.mobileNav')">
     <div class="bottom-bar-inner">
       <router-link
         v-for="item in mainMobileItems"

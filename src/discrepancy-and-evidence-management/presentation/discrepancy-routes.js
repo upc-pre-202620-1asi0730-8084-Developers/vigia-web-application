@@ -7,7 +7,7 @@ export const discrepancyRoutes = [
         name: 'problemas',
         component: IssuesListView,
         meta: {
-            title: 'Problemas'
+            titleKey: 'pageTitles.issues'
         }
     },
     {
@@ -15,7 +15,7 @@ export const discrepancyRoutes = [
         name: 'problema-detalle',
         component: IssueDetailView,
         meta: {
-            title: 'Detalle del problema'
+            titleKey: 'pageTitles.issue_details'
         }
     }
 ]

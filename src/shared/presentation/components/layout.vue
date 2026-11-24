@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Sidebar from './sidebar.vue';
@@ -15,6 +15,12 @@ const router = useRouter();
 const iamStore = useIamStore();
 
 const isUserMenuOpen = ref(false);
+const content = ref(null);
+const profileButton = ref(null);
+const profilePanel = ref(null);
+function focusContent() { content.value?.focus(); }
+async function closeUserMenu() { isUserMenuOpen.value = false; await nextTick(); profileButton.value?.focus(); }
+watch(() => route.fullPath, async () => { isUserMenuOpen.value = false; await nextTick(); focusContent(); });
 const formattedDate = computed(() => formatCurrentDate(locale.value));
 
 const currentNav = computed(() => {
@@ -35,8 +41,10 @@ const currentRoleDisplay = computed(() => {
   return iamStore.currentRole ? t(`roles.${iamStore.currentRole}`) : '';
 });
 
-function toggleUserMenu() {
+async function toggleUserMenu() {
   isUserMenuOpen.value = !isUserMenuOpen.value;
+  await nextTick();
+  if (isUserMenuOpen.value) profilePanel.value?.querySelector('button')?.focus();
 }
 
 function selectRole(newRole) {
@@ -73,6 +81,7 @@ onUnmounted(() => {
 
 <template>
   <div class="vigia-app-layout">
+    <a href="#main-content" class="skip-link" @click.prevent="focusContent">{{t('a11y.skip')}}</a>
     <pv-toast position="top-right" />
     <pv-confirm-dialog />
 
@@ -84,7 +93,7 @@ onUnmounted(() => {
       <!-- Topbar estilo Mockups Figma (§4.4.3): Fecha y Perfil de Usuario -->
       <header class="vigia-topbar">
         <div class="topbar-start">
-          <nav class="vigia-breadcrumb" aria-label="Migas de pan">
+          <nav class="vigia-breadcrumb" :aria-label="t('a11y.breadcrumb')">
             <router-link to="/inicio" class="breadcrumb-link">
               <i class="pi pi-home mr-1" aria-hidden="true"></i>
               <span>{{ t('nav.home') }}</span>
@@ -108,12 +117,11 @@ onUnmounted(() => {
           <LanguageSwitcher />
 
           <!-- Cápsula de Perfil de Usuario / Selector de Rol Interactivo (§4.4.3) -->
-          <div id="user-profile-menu-container" class="user-capsule-wrapper">
+          <div id="user-profile-menu-container" class="user-capsule-wrapper" @keydown.esc.stop.prevent="closeUserMenu">
             <button
               type="button"
-              class="user-capsule-btn"
+              ref="profileButton" class="user-capsule-btn" :aria-label="t('a11y.profile')" aria-controls="profile-panel"
               @click.stop="toggleUserMenu"
-              aria-haspopup="true"
               :aria-expanded="isUserMenuOpen"
             >
               <div class="user-avatar-circle">
@@ -128,7 +136,7 @@ onUnmounted(() => {
 
             <!-- Menú Desplegable de Cambio de Rol de Demostración -->
             <transition name="dropdown-fade">
-              <div v-if="isUserMenuOpen" class="user-dropdown-card" @click.stop>
+              <div v-if="isUserMenuOpen" id="profile-panel" ref="profilePanel" class="user-dropdown-card" @click.stop>
                 <div class="dropdown-header">
                   <span class="dropdown-header-label">{{ t('nav.roleSelector') }}</span>
                   <span class="dropdown-user-name">{{ iamStore.currentUsername }}</span>
@@ -168,7 +176,7 @@ onUnmounted(() => {
       </header>
 
       <!-- Vista activa -->
-      <main class="vigia-content-container">
+      <main id="main-content" ref="content" tabindex="-1" class="vigia-content-container">
         <router-view />
       </main>
 

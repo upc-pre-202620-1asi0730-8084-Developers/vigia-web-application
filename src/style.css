@@ -272,3 +272,8 @@ p, span, div, td, th {
   font-weight: 500;
   pointer-events: none;
 }
+
+/* Keep keyboard focus visible and allow navigation past repeated controls. */
+:focus-visible { outline: 3px solid #1b3a5c; outline-offset: 3px; }
+.skip-link { position: fixed; top: .5rem; left: .5rem; z-index: 10000; padding: .75rem 1rem; background: white; color: #1b3a5c; transform: translateY(-200%); }
+.skip-link:focus { transform: translateY(0); }
