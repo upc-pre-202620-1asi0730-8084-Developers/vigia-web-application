@@ -89,6 +89,13 @@ const mainQuantity = (dispatch) => {
       <pv-column :header="t('dispatches.table.transport')">
         <template #body="slotProps">{{ slotProps.data.vehiclePlate || t('dispatches.unassigned') }}</template>
       </pv-column>
+      <pv-column :header="t('guide.title')">
+        <template #body="{data}">
+          <div>{{ data.deliveryGuide?.guideNumber || t('guide.notIssued') }}</div>
+          <div v-if="data.isAuthorized">{{ t('guide.authorized') }}</div>
+          <router-link :to="{name:'ordering-dispatch-guide',params:{id:data.id}}">{{ t('guide.open') }}</router-link>
+        </template>
+      </pv-column>
       <pv-column :header="t('dispatches.table.exit')">
         <template #body="slotProps">{{ slotProps.data.departureDate }} · {{ slotProps.data.estimatedTime }}</template>
       </pv-column>

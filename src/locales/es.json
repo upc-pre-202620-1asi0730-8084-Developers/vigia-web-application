@@ -969,6 +969,27 @@
     "difference": "Diferencia neto − esperado", "operator": "Registrado por", "date": "Fecha y hora",
     "comparison": {"NOT_EVALUATED": "Sin comparación", "WITHIN_TOLERANCE": "Dentro de tolerancia", "OUTSIDE_TOLERANCE": "Fuera de tolerancia"}
   },
+  "guide": {
+    "title":"Guía de despacho", "open":"Ver guía y autorización", "notIssued":"Guía sin emitir",
+    "description":"El almacén confirma la carga, el pesaje y el transportista antes de autorizar el despacho.",
+    "authorized":"Despacho autorizado", "notAuthorized":"Despacho sin autorización vigente",
+    "issue":"Emitir guía y autorizar", "driver":"Conductor", "carrier":"Transportista o empresa",
+    "requirements":"Se requiere un despacho en preparación, vehículo asignado y pesaje vigente dentro de tolerancia. Revisa el pesaje antes de continuar.",
+    "confirmation":"Al confirmar se conservarán los materiales, el vehículo y el pesaje en la guía. Para corregirlos después será necesario cancelar el despacho y preparar uno nuevo.",
+    "locked":"La guía emitida conserva la carga, el vehículo y el pesaje; estos datos ya no se pueden modificar en este despacho.",
+    "issued":"Guía emitida y despacho autorizado. La salida aún debe registrarse cuando el vehículo abandone el almacén.",
+    "depart":"Confirmar salida del almacén", "departHint":"Confirma esta acción únicamente cuando el vehículo esté saliendo. El despacho pasará a En tránsito.",
+    "departed":"Salida registrada. El despacho está en tránsito.", "destination":"Destino", "issuedBy":"Emitida por", "issuedAt":"Fecha de emisión",
+    "loading":"Cargando despacho y guía…", "missing":"El despacho no existe.",
+    "loadError":"No se pudieron actualizar los datos. Si ya se confirmó la emisión, la guía sigue guardada; actualiza para consultarla.",
+    "invalid":"Indica conductor y transportista, con hasta 150 caracteres y sin saltos de línea.",
+    "saveError":"La guía no pudo emitirse. Actualiza el despacho y revisa los datos antes de continuar.",
+    "conflict":"El despacho cambió, ya tiene una guía o no cumple los requisitos. Revisa los datos actualizados.",
+    "pending":"Hay una emisión pendiente de confirmar. Sus datos se conservan para reintentar la misma operación sin duplicar la guía.",
+    "retry":"Reintentar la misma emisión", "uncertain":"No se pudo confirmar la respuesta. Reintenta la misma emisión para consultar o completar esa operación.",
+    "storageError":"Habilita el almacenamiento de sesión del navegador para conservar el identificador del envío.",
+    "departureError":"No se pudo confirmar la salida. Revisa el estado actualizado antes de repetir la acción."
+  },
   "errors": {
     "occurred": "Ocurrieron errores"
   }

@@ -24,7 +24,7 @@ const vehicleError = ref(false);
 const pending = ref(null);
 const form = ref({weightKg: null, expectedWeightKg: null, toleranceKg: null});
 const storageKey = computed(() => weighingStorageKey(iam.currentUserId, route.params.id));
-const canWeigh = computed(() => ready.value && dispatch.value?.status === 'IN_PREPARATION' && Boolean(dispatch.value?.vehicleId));
+const canWeigh = computed(() => ready.value && !dispatch.value?.deliveryGuide && dispatch.value?.status === 'IN_PREPARATION' && Boolean(dispatch.value?.vehicleId));
 const editable = computed(() => canWeigh.value && !saving.value && !pending.value && !loading.value);
 const vehicles = computed(() => fleet.vehicles.map(v => ({label: v.licensePlate, value: v.id})));
 const kg = value => value == null ? '—' : `${new Intl.NumberFormat(locale.value, {maximumFractionDigits: 3}).format(value)} kg`;
@@ -136,7 +136,9 @@ loadVehicles();
         </ul>
         <p v-if="dispatch.requiresWeightReview" class="notice">{{ t('weighing.review') }}</p>
         <p v-if="dispatch.status !== 'IN_PREPARATION'">{{ t('weighing.closed') }}</p>
-        <template v-if="dispatch.status === 'IN_PREPARATION' && !pending">
+        <p v-if="dispatch.deliveryGuide">{{ t('guide.locked') }}</p>
+        <router-link :to="{name:'ordering-dispatch-guide',params:{id:dispatch.id}}">{{ t('guide.open') }}</router-link>
+        <template v-if="dispatch.status === 'IN_PREPARATION' && !dispatch.deliveryGuide && !pending">
           <label for="weighing-vehicle">{{ t('weighing.vehicle') }}</label>
           <div class="vehicle-controls">
             <pv-select inputId="weighing-vehicle" :aria-label="t('weighing.vehicle')" v-model="vehicleId" :options="vehicles" optionLabel="label" optionValue="value" :disabled="saving" />
