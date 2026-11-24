@@ -1,7 +1,7 @@
 <script setup>
 import {useI18n} from "vue-i18n";
 import {useToast} from "primevue";
-import {computed, nextTick, onMounted, ref, toRefs, watch} from "vue";
+import {computed, nextTick, onMounted, onUnmounted, ref, toRefs, watch} from "vue";
 import 'leaflet/dist/leaflet.css';
 import {LCircle, LCircleMarker, LMap, LPolyline, LPopup, LTileLayer} from "@vue-leaflet/vue-leaflet";
 import useTransitTraceabilityStore from "../../application/transit-traceability.store.js";
@@ -9,6 +9,12 @@ import {SIMULATION_MODE} from "../../infrastructure/telemetry-simulator.js";
 import {ROUTE_STATUS, routeStatusSeverity, transitAlertSeverity, TRANSIT_ALERT_TYPE} from "../../domain/route-status.js";
 import {useMapLoading} from "../../../shared/presentation/use-map-loading.js";
 
+import {useRoute} from 'vue-router';
+import useIamStore from '../../../iam/application/iam.store.js';
+const iam=useIamStore();
+const canManage=computed(()=>['ADMIN','WAREHOUSE_MANAGER'].includes(iam.currentRole));
+const canSimulate=computed(()=>import.meta.env.VITE_USE_IN_MEMORY_API==='true'&&canManage.value);
+const queryRoute=useRoute();
 const {t, te, locale} = useI18n();
 const toast = useToast();
 const store = useTransitTraceabilityStore();
@@ -16,7 +22,7 @@ const {isMapLoading, markLoaded, startFallbackTimer} = useMapLoading();
 const {routes, routesLoaded, errors, activeCount, deviatedCount, stoppedCount, pendingNotificationsCount} = toRefs(store);
 const {fetchRoutes, getRouteById, reportPosition, reportSignalLost, notifyDestinationSite} = store;
 
-const selectedRouteId = ref(null);
+const selectedRouteId = ref(queryRoute.query.route || null);
 const selectedRoute = computed(() => getRouteById(selectedRouteId.value) ?? null);
 const tableSelection = computed({
   get: () => selectedRoute.value,
@@ -40,9 +46,10 @@ const readPalette = () => {
 
 const palette = readPalette();
 
-onMounted(() => {
-  if (!store.routesLoaded) fetchRoutes();
-});
+const refreshing=ref(false); let poll;
+async function refresh(){if(refreshing.value||isBusy.value)return;refreshing.value=true;try{await fetchRoutes();}finally{refreshing.value=false;}}
+onMounted(()=>{refresh();poll=setInterval(()=>{if(!document.hidden)refresh();},15000);});
+onUnmounted(()=>clearInterval(poll));
 
 /** Select the first active route once routes are available. */
 watch(routesLoaded, loaded => {
@@ -119,6 +126,8 @@ const notifySite = alertId => run(() => notifyDestinationSite(selectedRoute.valu
 
 <template>
   <div class="transit-tracking">
+    <pv-button :label="t('departure.reload')" :loading="refreshing" :disabled="refreshing||isBusy" @click="refresh" />
+    <p v-if="errors.length" role="alert">{{t('departure.trackingError')}}</p>
     <div class="grid mb-3">
       <div class="col-12 md:col-3"><div class="kpi-card"><i class="pi pi-send mr-2" />{{ t('transit.kpi.active') }}<h2 class="m-0 mt-2">{{ activeCount }}</h2></div></div>
       <div class="col-12 md:col-3"><div class="kpi-card"><i class="pi pi-directions-alt mr-2" />{{ t('transit.kpi.deviated') }}<h2 class="m-0 mt-2">{{ deviatedCount }}</h2></div></div>
@@ -176,6 +185,7 @@ const notifySite = alertId => run(() => notifyDestinationSite(selectedRoute.valu
                   <pv-tag :value="t(`transit.status.${selectedRoute.status}`)" :severity="routeStatusSeverity(selectedRoute.status)" />
                   <span class="text-secondary">· {{ selectedRoute.dispatchId }} · {{ selectedRoute.vehiclePlate }}</span>
                 </div>
+                <p>{{t(selectedRoute.trackingSource==='DEVICE'?'departure.deviceTracking':'departure.legacyTracking')}} <span v-if="selectedRoute.gpsDeviceId">· {{selectedRoute.gpsDeviceId}}</span></p>
                 <div class="grid summary">
                   <div class="col-6 md:col-3"><small>{{ t('transit.summary.origin') }}</small><div>{{ selectedRoute.originName }}</div></div>
                   <div class="col-6 md:col-3"><small>{{ t('transit.summary.destination') }}</small><div>{{ selectedRoute.destination.name }}</div></div>
@@ -247,7 +257,7 @@ const notifySite = alertId => run(() => notifyDestinationSite(selectedRoute.valu
                 <span><i class="legend-dot" :style="{background: palette.accent}" />{{ t('transit.map.destination') }}</span>
               </div>
 
-              <div class="simulation mt-4">
+              <div v-if="canSimulate && selectedRoute.trackingSource!=='DEVICE'" class="simulation mt-4">
                 <h3 class="m-0 mb-1">{{ t('transit.simulation.title') }}</h3>
                 <p class="text-secondary mt-0 mb-3">{{ t('transit.simulation.hint') }}</p>
                 <div class="flex flex-wrap gap-2">
@@ -272,7 +282,7 @@ const notifySite = alertId => run(() => notifyDestinationSite(selectedRoute.valu
                       <pv-tag :value="t(`transit.alerts.type.${item.type}`)" :severity="transitAlertSeverity(item.type)" />
                       <small v-if="alertDetail(item)">{{ alertDetail(item) }}</small>
                     </div>
-                    <pv-button v-if="item.isPendingNotification" :label="t('transit.alerts.notify')" icon="pi pi-bell"
+                    <pv-button v-if="item.isPendingNotification && canManage" :label="t('transit.alerts.notify')" icon="pi pi-bell"
                                class="p-button-sm btn-accent mb-3" :disabled="isBusy" @click="notifySite(item.id)" />
                     <small v-else-if="item.notifiedAt" class="notified mb-3 block">
                       <i class="pi pi-check mr-1" />{{ t('transit.alerts.notified') }} · {{ formatTime(item.notifiedAt) }}

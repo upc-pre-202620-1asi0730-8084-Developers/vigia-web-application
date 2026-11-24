@@ -48,13 +48,14 @@ const useTransitTraceabilityStore = defineStore('transitTraceability', () => {
      * Loads routes from infrastructure and updates the application state.
      * @returns {void}
      */
-    function fetchRoutes() {
-        transitTraceabilityApi.getRoutes().then(response => {
+    async function fetchRoutes() {
+        try {
+            const response = await transitTraceabilityApi.getRoutes();
             routes.value = RouteAssembler.toEntitiesFromResponse(response);
-            routesLoaded.value = true;
-        }).catch(error => {
-            errors.value.push(error);
-        });
+            errors.value = [];
+            return true;
+        } catch (error) { errors.value = [error]; return false; }
+        finally { routesLoaded.value = true; }
     }
 
     /**

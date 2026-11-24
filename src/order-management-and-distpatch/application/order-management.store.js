@@ -252,16 +252,10 @@ const useOrderManagementStore = defineStore('orderManagement', () => {
         return (await orderManagementApi.issueDeliveryGuide(id, details)).data;
     }
 
-    async function departDispatch(id) {
-        const current = DispatchAssembler.toEntityFromResource((await orderManagementApi.updateDispatch({id, status: 'IN_TRANSIT'})).data);
-        const index = dispatches.value.findIndex(d => String(d.id) === String(id));
-        if (index >= 0) dispatches.value[index] = current;
-        return current;
-    }
+
 
     return {
         issueDeliveryGuide,
-        departDispatch,
         fetchOrder,
         fetchDispatch,
         fetchDispatchWeighings,

@@ -70,19 +70,7 @@ async function issue() {
   } finally {saving.value = false;}
 }
 
-async function depart() {
-  if (saving.value || loading.value || !ready.value || !dispatch.value?.canDepart) return;
-  saving.value = true;
-  error.value = '';
-  feedback.value = '';
-  try {
-    dispatch.value = await store.departDispatch(route.params.id);
-    feedback.value = 'departed';
-  } catch {
-    await load();
-    error.value = 'departureError';
-  } finally {saving.value = false;}
-}
+
 
 const kg = value => `${new Intl.NumberFormat(locale.value,{maximumFractionDigits:3}).format(value)} kg`;
 const date = value => new Intl.DateTimeFormat(locale.value,{dateStyle:'medium',timeStyle:'short'}).format(new Date(value));
@@ -146,7 +134,7 @@ watch(() => route.params.id, () => {
         <ul><li v-for="item in guide.items" :key="item.itemId">{{ item.code }} — {{ item.material }}: {{ item.quantity }} {{ item.unit }}</li></ul>
         <template v-if="dispatch.canDepart">
           <p>{{ t('guide.departHint') }}</p>
-          <pv-button :label="t('guide.depart')" :disabled="saving || loading || !!pending" :loading="saving" @click="depart" />
+          <router-link :to="{name:'ordering-dispatch-departure',params:{id:route.params.id}}">{{t('guide.depart')}}</router-link>
         </template>
       </section>
     </template>

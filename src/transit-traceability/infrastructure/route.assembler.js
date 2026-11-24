@@ -36,7 +36,7 @@ export class RouteAssembler {
      */
     static toResourceFromEntity(entity) {
         return {
-            id: entity.id,
+            id: entity.id, trackingSource: entity.trackingSource, trackingActive: entity.trackingActive, gpsDeviceId: entity.gpsDeviceId, departureRequestId: entity.departureRequestId,
             dispatchId: entity.dispatchId,
             vehicleId: entity.vehicleId,
             vehiclePlate: entity.vehiclePlate,

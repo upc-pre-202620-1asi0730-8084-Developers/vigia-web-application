@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue';
 import { useRouter } from 'vue-router';
@@ -39,7 +39,17 @@ watch(
   { immediate: true }
 );
 
+let arrivalPoll;
+const arrivalNotice=ref('');
+async function refreshArrivals(){
+ if(receptionStore.loadingArrivals)return;
+ const before=new Set(receptionStore.upcomingArrivals.map(a=>a.dispatchId));
+ const ok=await receptionStore.fetchUpcomingArrivals();
+ arrivalNotice.value=ok===false?'arrivalError':receptionStore.upcomingArrivals.some(a=>!before.has(a.dispatchId))?'newArrival':'';
+}
+onUnmounted(()=>clearInterval(arrivalPoll));
 onMounted(async () => {
+  arrivalPoll=setInterval(()=>{if(!document.hidden)refreshArrivals();},15000);
   try {
     await Promise.all([
       receptionStore.fetchReceptions(),
@@ -98,6 +108,8 @@ async function handleConfirmReception(reception) {
 
 <template>
   <div class="reception-management-view">
+    <pv-button :label="t('departure.reload')" :disabled="receptionStore.loadingArrivals" @click="refreshArrivals" />
+    <p v-if="arrivalNotice" role="status" aria-live="polite">{{t(`departure.${arrivalNotice}`)}}</p>
     <!-- Header General con selector de perspectiva y botón de acción -->
     <div class="header-container mb-4">
       <div class="header-text">

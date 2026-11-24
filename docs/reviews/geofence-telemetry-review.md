@@ -21,3 +21,9 @@ Backend verification used isolated local data: 34 expected-status HTTP checks, f
 ## Row 11 implementation
 
 The reviewed interface defects are addressed by fresh vehicle reads, bounded requests, guarded submissions, structured localized conflicts, server-confirmed recovery of uncertain vehicle/GPS writes, and real project selection. Warehouse geofences use an explicit code/name, and radius limits match the API. Local UI verification covers registration with an occupied GPS, the actual owning plate in both languages, successful pairing, real project selection, duplicate geofence rejection and persistence after reload. Device timestamp ordering and active route integration remain in row 12.
+
+## Row 12 implementation
+
+F10-05/06 are addressed by atomic dispatch departure and device-bound route tracking. Ordered UTC telemetry rejects stale/conflicting reports and preserves exact retries; an active dispatch, vehicle and GPS snapshot share route history. Unpaired events remain unassociated. New departures require a conforming weighing, guide, GPS and both geofences. Resident visibility is limited to assigned sites; upcoming arrivals is the in-app destination notice. Device-bound production API tracking is distinguished from historical/demo routes in the UI.
+
+Verified locally: 450 functional HTTP requests across seven suites, 16 Production-mode HTTP checks, 12 frontend tests, native domain/rollback/concurrency checks, upgrade11→12 preserving28existing tables and UI departure plus a GPS report displayed on its map in ES/EN. No physical hardware acceptance, Azure start, release or new cloud deployment. Existing receipt workflows remain subject to the separate integration/review row.

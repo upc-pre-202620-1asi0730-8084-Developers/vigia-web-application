@@ -19,6 +19,7 @@ export class TransitTraceabilityApi extends BaseApi {
     /** Creates the endpoint client for routes. */
     constructor() {
         super();
+        this.http.defaults.timeout = 15000;
         this.#routesEndpoint = new BaseEndpoint(this, routesEndpointPath);
     }
 
@@ -26,6 +27,9 @@ export class TransitTraceabilityApi extends BaseApi {
      * Fetches all routes.
      * @returns {Promise<import('axios').AxiosResponse>} Promise resolving to the routes' response.
      */
+    departureOptions(id) { return this.http.get(`/dispatches/${id}/departure`); }
+    depart(id, plan) { return this.http.post(`/dispatches/${id}/departure`, plan); }
+
     getRoutes() {
         return this.#routesEndpoint.getAll();
     }

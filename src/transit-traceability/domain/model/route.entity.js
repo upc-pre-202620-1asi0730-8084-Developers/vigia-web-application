@@ -43,7 +43,8 @@ export class Route {
     constructor({ id = null, dispatchId = null, vehicleId = null, vehiclePlate = '', originName = '',
                   destinationGeofenceId = null, destination = {}, plannedPath = [], positions = [], alerts = [],
                   status = ROUTE_STATUS.IN_TRANSIT, startedAt = '', estimatedArrival = '', arrivedAt = null,
-                  deviationThresholdMeters = 300, stopThresholdMinutes = 15 }) {
+                  deviationThresholdMeters = 300, stopThresholdMinutes = 15, trackingSource = 'LEGACY', trackingActive = null, gpsDeviceId = null, departureRequestId = null }) {
+        this.trackingSource=trackingSource; this.trackingActive=trackingActive; this.gpsDeviceId=gpsDeviceId; this.departureRequestId=departureRequestId;
         this.id = id;
         this.dispatchId = dispatchId;
         this.vehicleId = vehicleId;
@@ -69,7 +70,7 @@ export class Route {
 
     /** @returns {boolean} Whether the route still accepts telemetry. */
     get isActive() {
-        return this.status !== ROUTE_STATUS.ARRIVED;
+        return this.trackingActive !== false && this.status !== ROUTE_STATUS.ARRIVED;
     }
 
     /** @returns {?TelemetryPosition} Last reported position. */
