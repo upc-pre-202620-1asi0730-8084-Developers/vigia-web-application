@@ -566,6 +566,11 @@ function getStatusLabel(status) {
 }
 
 /* Tables */
+.table-responsive {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .clean-table {
   border-collapse: collapse;
   font-size: 13px;
