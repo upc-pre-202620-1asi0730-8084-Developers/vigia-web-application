@@ -25,9 +25,7 @@ const filteredDispatches = computed(() => dispatches.value.filter(dispatch => {
   return matchesStatus && matchesSearch;
 }));
 
-onMounted(() => {
-  if (!store.dispatchesLoaded) fetchDispatches();
-});
+onMounted(fetchDispatches);
 
 /**
  * Navigate to the new dispatch page.
@@ -76,7 +74,7 @@ const mainQuantity = (dispatch) => {
         <template #body="{data}">
           <div>{{ data.latestWeighing ? `${data.latestWeighing.weightKg} kg` : t('weighing.noWeight') }}</div>
           <div v-if="data.requiresWeightReview">{{ t('weighing.review') }}</div>
-          <router-link :to="{name: 'ordering-dispatch-weighing', params: {id: data.id}}">{{ t('weighing.open') }}</router-link>
+          <router-link class="dispatch-action-link" :to="{name: 'ordering-dispatch-weighing', params: {id: data.id}}">{{ t('weighing.open') }}</router-link>
         </template>
       </pv-column>
       <pv-column field="projectName" :header="t('dispatches.table.work')" sortable />
@@ -93,7 +91,7 @@ const mainQuantity = (dispatch) => {
         <template #body="{data}">
           <div>{{ data.deliveryGuide?.guideNumber || t('guide.notIssued') }}</div>
           <div v-if="data.isAuthorized">{{ t('guide.authorized') }}</div>
-          <router-link :to="{name:'ordering-dispatch-guide',params:{id:data.id}}">{{ t('guide.open') }}</router-link>
+          <router-link class="dispatch-action-link" :to="{name:'ordering-dispatch-guide',params:{id:data.id}}">{{ t('guide.open') }}</router-link>
         </template>
       </pv-column>
       <pv-column :header="t('dispatches.table.exit')">
@@ -112,5 +110,9 @@ const mainQuantity = (dispatch) => {
 </template>
 
 <style scoped>
-
+.dispatch-action-link {
+  display: inline-block;
+  min-height: 24px;
+  padding-block: 0.25rem;
+}
 </style>
