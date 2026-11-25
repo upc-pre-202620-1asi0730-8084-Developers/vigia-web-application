@@ -547,6 +547,11 @@ const comparisonPercentages = computed(() => {
 }
 
 /* Tablas */
+.table-responsive {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .clean-table {
   border-collapse: collapse;
   font-size: 13px;
