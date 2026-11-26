@@ -23,22 +23,22 @@ const dateRange = ref('01/04/2025 - 14/04/2025');
 const currentPage = ref(1);
 const rowsPerPage = ref(10);
 
-const projectOptions = [
-  { label: 'Todos los proyectos (All projects)', value: 'all' },
+const projectOptions = computed(() => [
+  { label: t('receptions.filters.allProjects'), value: 'all' },
   { label: 'Torre A', value: 'Torre A' },
   { label: 'Planta Norte', value: 'Planta Norte' },
   { label: 'Centro Comercial Sur', value: 'Centro Comercial Sur' },
   { label: 'Puente Río', value: 'Puente Río' },
   { label: 'Hospital Central', value: 'Hospital Central' },
   { label: 'Residencial Valle', value: 'Residencial Valle' }
-];
+]);
 
-const statusOptions = [
-  { label: 'Todos los estados (All statuses)', value: 'all' },
-  { label: 'Completado (Completed)', value: RECEPTION_STATUS.VERIFIED_CONFORMANT },
-  { label: 'Con diferencia (With difference)', value: RECEPTION_STATUS.VERIFIED_DISCREPANT },
-  { label: 'Pendiente (Pending / Arrived)', value: RECEPTION_STATUS.ARRIVED }
-];
+const statusOptions = computed(() => [
+  { label: t('receptions.filters.allStatuses'), value: 'all' },
+  { label: t('receptions.status.completed'), value: RECEPTION_STATUS.VERIFIED_CONFORMANT },
+  { label: t('receptions.status.withDifference'), value: RECEPTION_STATUS.VERIFIED_DISCREPANT },
+  { label: t('receptions.status.pending'), value: RECEPTION_STATUS.ARRIVED }
+]);
 
 const rowsPerPageOptions = [
   { label: '10', value: 10 },
@@ -162,8 +162,9 @@ function getStatusLabel(status) {
       <div class="filter-row flex flex-wrap align-items-center gap-3">
         <!-- Proyecto -->
         <div class="filter-group">
-          <label class="filter-label">{{ t('receptions.supervisor.filterProject') }}</label>
+          <label for="sup-filter-project" class="filter-label">{{ t('receptions.supervisor.filterProject') }}</label>
           <pv-select
+            input-id="sup-filter-project"
             v-model="selectedProject"
             :options="projectOptions"
             optionLabel="label"
@@ -174,8 +175,9 @@ function getStatusLabel(status) {
 
         <!-- Estado -->
         <div class="filter-group">
-          <label class="filter-label">{{ t('receptions.supervisor.filterStatus') }}</label>
+          <label for="sup-filter-status" class="filter-label">{{ t('receptions.supervisor.filterStatus') }}</label>
           <pv-select
+            input-id="sup-filter-status"
             v-model="selectedStatus"
             :options="statusOptions"
             optionLabel="label"
@@ -186,10 +188,10 @@ function getStatusLabel(status) {
 
         <!-- Rango de fechas -->
         <div class="filter-group">
-          <label class="filter-label">{{ t('receptions.supervisor.dateRange') }}</label>
+          <label for="sup-filter-date" class="filter-label">{{ t('receptions.supervisor.dateRange') }}</label>
           <div class="date-input-wrap">
-            <i class="pi pi-calendar mr-2 text-secondary"></i>
-            <pv-input-text v-model="dateRange" class="date-input" />
+            <i class="pi pi-calendar mr-2 text-secondary" aria-hidden="true"></i>
+            <pv-input-text id="sup-filter-date" v-model="dateRange" class="date-input" />
           </div>
         </div>
 
@@ -200,9 +202,9 @@ function getStatusLabel(status) {
             icon="pi pi-exclamation-triangle"
             class="p-button-outlined p-button-sm btn-stock-alerts"
           />
-          <a href="javascript:void(0)" class="clear-filters-link" @click="clearFilters">
+          <button type="button" class="clear-filters-link btn-link-reset" @click="clearFilters">
             {{ t('receptions.supervisor.clearFilters') }}
-          </a>
+          </button>
           <pv-button
             :label="t('receptions.supervisor.applyFilters')"
             icon="pi pi-filter"
@@ -220,7 +222,7 @@ function getStatusLabel(status) {
         <div class="card-header flex justify-content-between align-items-center mb-3">
           <h2 class="section-title m-0">{{ t('receptions.supervisor.tableTitle') }}</h2>
           <span class="total-badge text-secondary font-medium">
-            Total: {{ receptionStore.filteredReceptions.length }} {{ t('receptions.supervisor.receptionsCount') }}
+            {{ t('receptions.a11y.totalLabel') }}: {{ receptionStore.filteredReceptions.length }} {{ t('receptions.supervisor.receptionsCount') }}
           </span>
         </div>
 
@@ -242,8 +244,12 @@ function getStatusLabel(status) {
                 v-for="rec in receptionStore.filteredReceptions"
                 :key="rec.id"
                 :class="{ 'row-active-yellow': selectedItem && selectedItem.id === rec.id }"
+                :aria-selected="Boolean(selectedItem && selectedItem.id === rec.id)"
+                tabindex="0"
                 class="clickable-row"
                 @click="selectRow(rec)"
+                @keydown.enter.prevent="selectRow(rec)"
+                @keydown.space.prevent="selectRow(rec)"
               >
                 <td class="font-bold text-primary">{{ rec.id }}</td>
                 <td>{{ rec.siteName }}</td>
@@ -254,12 +260,17 @@ function getStatusLabel(status) {
                 <td>{{ rec.verifiedByUserName || '-' }}</td>
                 <td>
                   <span class="status-pill" :class="getStatusBadgeClass(rec.status)">
-                    <span class="status-dot"></span>
+                    <span class="status-dot" aria-hidden="true"></span>
                     {{ getStatusLabel(rec.status) }}
                   </span>
                 </td>
                 <td class="text-right">
-                  <pv-button icon="pi pi-ellipsis-h" class="p-button-text p-button-rounded p-button-sm text-secondary" />
+                  <pv-button
+                    icon="pi pi-ellipsis-h"
+                    :aria-label="t('receptions.a11y.moreOptions', { id: rec.id })"
+                    class="p-button-text p-button-rounded p-button-sm text-secondary"
+                    @click.stop="selectRow(rec)"
+                  />
                 </td>
               </tr>
             </tbody>
@@ -271,20 +282,22 @@ function getStatusLabel(status) {
           <span class="text-xs text-secondary">
             {{ t('receptions.supervisor.showing') }} 1-{{ Math.min(10, receptionStore.filteredReceptions.length) }} {{ t('receptions.supervisor.of') }} {{ receptionStore.filteredReceptions.length }}
           </span>
-          <div class="pagination-controls flex align-items-center gap-1">
-            <pv-button icon="pi pi-chevron-left" class="p-button-text p-button-sm" />
-            <pv-button label="1" class="p-button-sm btn-page-active" />
-            <pv-button label="2" class="p-button-text p-button-sm" />
-            <pv-button label="3" class="p-button-text p-button-sm" />
-            <pv-button icon="pi pi-chevron-right" class="p-button-text p-button-sm" />
-          </div>
+          <nav class="pagination-controls flex align-items-center gap-1" :aria-label="t('receptions.a11y.paginationNav')">
+            <pv-button icon="pi pi-chevron-left" :aria-label="t('receptions.a11y.previousPage')" class="p-button-text p-button-sm" />
+            <pv-button label="1" :aria-current="currentPage === 1 ? 'page' : undefined" class="p-button-sm btn-page-active" @click="currentPage = 1" />
+            <pv-button label="2" :aria-current="currentPage === 2 ? 'page' : undefined" class="p-button-text p-button-sm" @click="currentPage = 2" />
+            <pv-button label="3" :aria-current="currentPage === 3 ? 'page' : undefined" class="p-button-text p-button-sm" @click="currentPage = 3" />
+            <pv-button icon="pi pi-chevron-right" :aria-label="t('receptions.a11y.nextPage')" class="p-button-text p-button-sm" />
+          </nav>
           <div class="rows-select-wrap flex align-items-center gap-2">
-            <span class="text-xs text-secondary">{{ t('receptions.supervisor.rowsPerPage') }}</span>
+            <label for="sup-rows-per-page" class="text-xs text-secondary">{{ t('receptions.supervisor.rowsPerPage') }}</label>
             <pv-select
+              input-id="sup-rows-per-page"
               v-model="rowsPerPage"
               :options="rowsPerPageOptions"
               optionLabel="label"
               optionValue="value"
+              :aria-label="t('receptions.a11y.rowsPerPageLabel')"
               class="rows-select p-inputtext-sm"
             />
           </div>
@@ -292,7 +305,7 @@ function getStatusLabel(status) {
       </div>
 
       <!-- Detail Panel: Reception details (Right Side) -->
-      <aside v-if="selectedItem" class="detail-side-panel">
+      <aside v-if="selectedItem" class="detail-side-panel" :aria-label="t('receptions.a11y.detailsPanel')">
         <div class="panel-header flex justify-content-between align-items-center mb-3">
           <h3 class="panel-title m-0">{{ t('receptions.supervisor.detailsTitle') }}</h3>
           <span class="panel-id-badge font-bold">{{ selectedItem.id }}</span>
@@ -330,7 +343,7 @@ function getStatusLabel(status) {
           <div class="flex justify-content-between align-items-center mb-2">
             <h4 class="materials-title m-0">{{ t('receptions.supervisor.materialsReceived') }}</h4>
             <span class="text-xs text-secondary font-medium">
-              Total items: {{ selectedItem.items?.length || 0 }}
+              {{ t('receptions.a11y.totalItems', { count: selectedItem.items?.length || 0 }) }}
             </span>
           </div>
 
@@ -366,19 +379,26 @@ function getStatusLabel(status) {
         <div v-if="selectedItem.evidences?.length" class="evidences-mini-section mb-4">
           <div class="flex justify-content-between align-items-center mb-2">
             <span class="text-xs font-bold text-secondary uppercase">{{ t('receptions.discrepancy.evidenceTitle') }}</span>
-            <a href="javascript:void(0)" class="text-xs font-semibold text-primary" @click="emit('viewGallery', selectedItem)">
+            <button
+              type="button"
+              class="text-xs font-semibold text-primary btn-link-reset"
+              :aria-label="t('receptions.a11y.openGallery')"
+              @click="emit('viewGallery', selectedItem)"
+            >
               {{ t('receptions.checklist.viewPhotos') }} ({{ selectedItem.evidences.length }})
-            </a>
+            </button>
           </div>
           <div class="flex gap-2">
-            <div
+            <button
               v-for="ev in selectedItem.evidences.slice(0, 3)"
               :key="ev.id"
-              class="thumb-img border-round overflow-hidden cursor-pointer"
+              type="button"
+              class="thumb-img thumb-btn border-round overflow-hidden cursor-pointer p-0"
+              :aria-label="t('receptions.a11y.openEvidenceThumb', { caption: ev.caption || selectedItem.id })"
               @click="emit('viewGallery', selectedItem)"
             >
               <ProtectedEvidencePhoto :url="ev.evidenceUrl" :reception-id="selectedItem.id" :caption="ev.caption" />
-            </div>
+            </button>
           </div>
         </div>
 
@@ -528,6 +548,21 @@ function getStatusLabel(status) {
   color: var(--color-primary-light);
   text-decoration: underline;
   cursor: pointer;
+}
+
+.btn-link-reset {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn-link-reset:focus-visible,
+.clickable-row:focus-visible,
+.thumb-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* Layout */

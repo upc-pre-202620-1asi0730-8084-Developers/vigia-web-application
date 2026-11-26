@@ -228,15 +228,15 @@ function goBack() {
       <h1 class="m-0">{{ t('receptions.dialog.registerTitle') }}</h1>
     </div>
     <div class="vigia-card register-dialog-content">
-      <div v-if="errorMessage" class="error-banner mb-3">
-        <i class="pi pi-exclamation-triangle mr-2"></i>
+      <div v-if="errorMessage" class="error-banner mb-3" role="alert" aria-live="assertive">
+        <i class="pi pi-exclamation-triangle mr-2" aria-hidden="true"></i>
         <span>{{ errorMessage }}</span>
       </div>
 
       <!-- Selector de Despacho en camino -->
       <div v-if="!isEditingExisting" class="form-section mb-4">
-        <label class="section-label">
-          <i class="pi pi-truck mr-1 text-primary"></i>
+        <label for="receipt-arrival" class="section-label">
+          <i class="pi pi-truck mr-1 text-primary" aria-hidden="true"></i>
           {{ t('receptions.dialog.selectArrival') }}
         </label>
         <pv-select input-id="receipt-arrival"
@@ -286,10 +286,10 @@ function goBack() {
       <!-- Ítems y Cantidades a Cotejar -->
       <div class="items-section mb-4">
         <div class="flex justify-content-between align-items-center mb-2">
-          <label class="section-label m-0">
-            <i class="pi pi-box mr-1 text-primary"></i>
+          <h2 class="section-label m-0">
+            <i class="pi pi-box mr-1 text-primary" aria-hidden="true"></i>
             {{ t('receptions.dialog.itemsToVerify') }}
-          </label>
+          </h2>
         </div>
 
         <div class="items-table-container">
@@ -306,16 +306,16 @@ function goBack() {
             <tbody>
               <tr v-for="item in form.items" :key="item.id">
                 <td>
-                  <pv-input-text v-model="item.materialName" class="w-full" readonly disabled />
+                  <pv-input-text :aria-label="`${t('receptions.table.material')}: ${item.materialName}`" v-model="item.materialName" class="w-full" readonly disabled />
                 </td>
                 <td>
-                  <pv-input-number v-model="item.dispatchedQuantity" :min="0" :maxFractionDigits="3" class="w-full" disabled />
+                  <pv-input-number :aria-label="`${t('receptions.table.sent')}: ${item.materialName}`" v-model="item.dispatchedQuantity" :min="0" :maxFractionDigits="3" class="w-full" disabled />
                 </td>
                 <td>
                   <pv-input-number :aria-label="`${t('receptions.table.received')}: ${item.materialName}`" v-model="item.receivedQuantity" :min="0" :maxFractionDigits="3" class="w-full" :disabled="!canEditTarget || isSubmitting" />
                 </td>
                 <td>
-                  <pv-input-text v-model="item.unit" class="w-full" readonly disabled />
+                  <pv-input-text :aria-label="`${t('receptions.table.unit')}: ${item.materialName}`" v-model="item.unit" class="w-full" readonly disabled />
                 </td>
                 <td class="text-center font-bold">
                   <span :class="(item.dispatchedQuantity - item.receivedQuantity) > 0 ? 'text-red-500' : 'text-green-600'">
@@ -329,11 +329,11 @@ function goBack() {
       </div>
 
       <!-- Checklist de Verificación en Obra -->
-      <div class="checklist-section mb-4">
-        <label class="section-label mb-2">
-          <i class="pi pi-check-square mr-1 text-primary"></i>
+      <fieldset class="checklist-section mb-4 border-none p-0 m-0">
+        <legend class="section-label mb-2">
+          <i class="pi pi-check-square mr-1 text-primary" aria-hidden="true"></i>
           {{ t('receptions.checklist.title') }}
-        </label>
+        </legend>
         <div class="grid grid-nogutter checklist-grid">
           <div class="col-12 sm:col-6 mb-2 flex align-items-center">
             <pv-checkbox v-model="form.checklist.materialGoodCondition" :binary="true" inputId="chk-good" />
@@ -352,7 +352,7 @@ function goBack() {
             <label for="chk-obs" class="ml-2 cursor-pointer">{{ t('receptions.checklist.observationsRecorded') }}</label>
           </div>
         </div>
-      </div>
+      </fieldset>
 
       <!-- Observaciones -->
       <div class="mb-3">
@@ -361,8 +361,10 @@ function goBack() {
           v-model="form.observations"
           rows="2"
           class="w-full"
+          aria-describedby="receipt-observations-count"
           :placeholder="t('receptions.dialog.observationsPlaceholder')"
         />
+        <small id="receipt-observations-count" class="caption">{{ t('receptions.a11y.observationsCount', { count: (form.observations || '').length }) }}</small>
       </div>
 
       <div class="form-footer">

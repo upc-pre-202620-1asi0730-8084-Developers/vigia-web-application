@@ -22,12 +22,12 @@ const iamStore = useIamStore();
 const timeFilter = ref('last7days');
 const isDetailsOpen = ref(true);
 
-const timeFilterOptions = [
-  { label: 'Últimos 7 días (Last 7 days)', value: 'last7days' },
-  { label: 'Hoy (Today)', value: 'today' },
-  { label: 'Este mes (This month)', value: 'month' },
-  { label: 'Todos (All)', value: 'all' }
-];
+const timeFilterOptions = computed(() => [
+  { label: t('receptions.filters.last7days'), value: 'last7days' },
+  { label: t('receptions.filters.today'), value: 'today' },
+  { label: t('receptions.filters.month'), value: 'month' },
+  { label: t('receptions.filters.all'), value: 'all' }
+]);
 
 const selectedItem = computed(() => {
   return receptionStore.selectedReception || receptionStore.receptions[0] || null;
@@ -144,7 +144,7 @@ const comparisonPercentages = computed(() => {
         <div class="section-card mb-4">
           <div class="card-header flex justify-content-between align-items-center mb-3">
             <h2 class="section-title m-0">{{ t('receptions.arrivals.title') }}</h2>
-            <a href="javascript:void(0)" class="view-all-link font-medium">{{ t('common.viewAll') }}</a>
+            <button type="button" class="view-all-link font-medium btn-link-reset" @click="timeFilter = 'all'">{{ t('common.viewAll') }}</button>
           </div>
 
           <div class="table-responsive">
@@ -186,8 +186,14 @@ const comparisonPercentages = computed(() => {
                         class="p-button-outlined p-button-sm btn-pill-action"
                         @click="emit('registerArrival', arrival)"
                       />
-                      <button type="button" class="btn-dots" title="Más opciones">
-                        <i class="pi pi-ellipsis-h"></i>
+                      <button
+                        type="button"
+                        class="btn-dots"
+                        :title="t('receptions.a11y.moreOptions', { id: arrival.id })"
+                        :aria-label="t('receptions.a11y.moreOptions', { id: arrival.id })"
+                        @click="emit('registerArrival', arrival)"
+                      >
+                        <i class="pi pi-ellipsis-h" aria-hidden="true"></i>
                       </button>
                     </div>
                   </td>
@@ -206,6 +212,7 @@ const comparisonPercentages = computed(() => {
               :options="timeFilterOptions"
               optionLabel="label"
               optionValue="value"
+              :aria-label="t('receptions.a11y.timeFilter')"
               class="time-select p-inputtext-sm"
             />
           </div>
@@ -230,11 +237,15 @@ const comparisonPercentages = computed(() => {
                   v-for="rec in receptionStore.filteredReceptions"
                   :key="rec.id"
                   :class="{ 'row-selected': selectedItem && selectedItem.id === rec.id }"
+                  :aria-selected="Boolean(selectedItem && selectedItem.id === rec.id)"
+                  tabindex="0"
                   @click="selectRow(rec)"
+                  @keydown.enter.prevent="selectRow(rec)"
+                  @keydown.space.prevent="selectRow(rec)"
                   class="clickable-row"
                 >
                   <td class="font-bold text-primary">
-                    <i class="pi pi-box mr-1 text-secondary"></i>
+                    <i class="pi pi-box mr-1 text-secondary" aria-hidden="true"></i>
                     {{ rec.id }}
                   </td>
                   <td>{{ rec.primaryMaterial }}</td>
@@ -247,7 +258,7 @@ const comparisonPercentages = computed(() => {
                   </td>
                   <td>
                     <span class="status-pill" :class="getStatusBadgeClass(rec.status)">
-                      <span class="status-dot"></span>
+                      <span class="status-dot" aria-hidden="true"></span>
                       {{ getStatusLabel(rec.status) }}
                     </span>
                   </td>
@@ -262,8 +273,14 @@ const comparisonPercentages = computed(() => {
                         class="p-button-outlined p-button-sm btn-pill-action"
                         @click.stop="selectRow(rec)"
                       />
-                      <button type="button" class="btn-dots" title="Más opciones" @click.stop>
-                        <i class="pi pi-ellipsis-h"></i>
+                      <button
+                        type="button"
+                        class="btn-dots"
+                        :title="t('receptions.a11y.moreOptions', { id: rec.id })"
+                        :aria-label="t('receptions.a11y.moreOptions', { id: rec.id })"
+                        @click.stop="selectRow(rec)"
+                      >
+                        <i class="pi pi-ellipsis-h" aria-hidden="true"></i>
                       </button>
                     </div>
                   </td>
@@ -275,11 +292,12 @@ const comparisonPercentages = computed(() => {
       </div>
 
       <!-- Columna Derecha: Panel de Detalle (Reception Details) -->
-      <aside v-if="isDetailsOpen && selectedItem" class="details-panel">
+      <aside v-if="isDetailsOpen && selectedItem" class="details-panel" :aria-label="t('receptions.a11y.detailsPanel')">
         <div class="panel-header flex justify-content-between align-items-center mb-3">
           <h3 class="panel-title m-0">{{ t('receptions.details.title') }}</h3>
           <pv-button
             icon="pi pi-times"
+            :aria-label="t('receptions.a11y.closeDetails')"
             class="p-button-text p-button-rounded p-button-sm"
             @click="closeDetails"
           />
@@ -326,13 +344,13 @@ const comparisonPercentages = computed(() => {
           </div>
           <div class="meta-row">
             <span class="meta-label">{{ t('receptions.details.location') }}</span>
-            <span class="meta-value">{{ selectedItem.siteName || 'Obra' }}</span>
+            <span class="meta-value">{{ selectedItem.siteName || '-' }}</span>
           </div>
         </div>
 
         <!-- Observaciones -->
         <div class="observations-box mb-4">
-          <label class="meta-label">{{ t('receptions.details.observations') }}</label>
+          <span class="meta-label block">{{ t('receptions.details.observations') }}</span>
           <p class="obs-text m-0">{{ selectedItem.observations || t('receptions.details.noObservations') }}</p>
         </div>
 
@@ -359,13 +377,27 @@ const comparisonPercentages = computed(() => {
           <!-- Barras de comparación visuales -->
           <div class="bars-container">
             <div class="bar-row mb-2">
-              <div class="bar-track">
+              <div
+                class="bar-track"
+                role="progressbar"
+                :aria-label="t('receptions.a11y.sentBarLabel')"
+                :aria-valuenow="Math.round(comparisonPercentages.sent)"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
                 <div class="bar-fill bar-sent" :style="{ width: `${comparisonPercentages.sent}%` }"></div>
               </div>
               <span class="bar-caption">{{ selectedItem.totalDispatchedQuantity }} {{ selectedItem.items?.[0]?.unit || 't' }}</span>
             </div>
             <div class="bar-row">
-              <div class="bar-track">
+              <div
+                class="bar-track"
+                role="progressbar"
+                :aria-label="t('receptions.a11y.receivedBarLabel')"
+                :aria-valuenow="Math.round(comparisonPercentages.received)"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
                 <div class="bar-fill bar-received" :style="{ width: `${comparisonPercentages.received}%` }"></div>
               </div>
               <span class="bar-caption">{{ selectedItem.totalReceivedQuantity }} {{ selectedItem.items?.[0]?.unit || 't' }}</span>
@@ -378,33 +410,34 @@ const comparisonPercentages = computed(() => {
           <h4 class="checklist-title mb-2">{{ t('receptions.checklist.title') }}</h4>
           <ul class="checklist-items">
             <li class="check-row" :class="{ 'checked': selectedItem.checklist?.materialGoodCondition }">
-              <i :class="selectedItem.checklist?.materialGoodCondition ? 'pi pi-check-square text-green' : 'pi pi-stop text-secondary'"></i>
+              <i :class="selectedItem.checklist?.materialGoodCondition ? 'pi pi-check-square text-green' : 'pi pi-stop text-secondary'" aria-hidden="true"></i>
               <span>{{ t('receptions.checklist.goodCondition') }}</span>
             </li>
             <li class="check-row" :class="{ 'checked': selectedItem.checklist?.quantityVerified }">
-              <i :class="selectedItem.checklist?.quantityVerified ? 'pi pi-check-square text-green' : 'pi pi-stop text-secondary'"></i>
+              <i :class="selectedItem.checklist?.quantityVerified ? 'pi pi-check-square text-green' : 'pi pi-stop text-secondary'" aria-hidden="true"></i>
               <span>{{ t('receptions.checklist.verifiedQuantity') }}</span>
             </li>
             <li class="check-row" :class="{ 'checked': selectedItem.checklist?.deliveryGuideReceived }">
-              <i :class="selectedItem.checklist?.deliveryGuideReceived ? 'pi pi-check-square text-green' : 'pi pi-stop text-secondary'"></i>
+              <i :class="selectedItem.checklist?.deliveryGuideReceived ? 'pi pi-check-square text-green' : 'pi pi-stop text-secondary'" aria-hidden="true"></i>
               <span>{{ t('receptions.checklist.guideReceived') }}</span>
             </li>
             <li class="check-row" :class="{ 'checked': selectedItem.checklist?.photographicEvidence }">
-              <i :class="selectedItem.checklist?.photographicEvidence ? 'pi pi-check-square text-green' : 'pi pi-stop text-secondary'"></i>
+              <i :class="selectedItem.checklist?.photographicEvidence ? 'pi pi-check-square text-green' : 'pi pi-stop text-secondary'" aria-hidden="true"></i>
               <div class="flex justify-content-between align-items-center w-full">
                 <span>{{ t('receptions.checklist.photoEvidence') }}</span>
-                <a
+                <button
                   v-if="selectedItem.evidences?.length"
-                  href="javascript:void(0)"
-                  class="evidence-link text-xs font-semibold"
+                  type="button"
+                  class="evidence-link text-xs font-semibold btn-link-reset"
+                  :aria-label="t('receptions.a11y.openGallery')"
                   @click="emit('viewGallery', selectedItem)"
                 >
                   {{ t('receptions.checklist.viewPhotos') }} ({{ selectedItem.evidences.length }})
-                </a>
+                </button>
               </div>
             </li>
             <li class="check-row" :class="{ 'checked': selectedItem.checklist?.observationsRecorded }">
-              <i :class="selectedItem.checklist?.observationsRecorded ? 'pi pi-check-square text-green' : 'pi pi-stop text-secondary'"></i>
+              <i :class="selectedItem.checklist?.observationsRecorded ? 'pi pi-check-square text-green' : 'pi pi-stop text-secondary'" aria-hidden="true"></i>
               <span>{{ t('receptions.checklist.observationsRecorded') }}</span>
             </li>
           </ul>
@@ -536,6 +569,21 @@ const comparisonPercentages = computed(() => {
   color: var(--color-primary-light);
   font-size: 13px;
   text-decoration: none;
+}
+
+.btn-link-reset {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn-link-reset:focus-visible,
+.clickable-row:focus-visible,
+.btn-dots:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .view-all-link:hover {

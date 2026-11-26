@@ -36,8 +36,8 @@ function closeDialog() {
     @update:visible="closeDialog"
   >
     <div class="gallery-content">
-      <div v-if="!evidences.length" class="text-center p-4">
-        <i class="pi pi-images text-4xl text-300 mb-2"></i>
+      <div v-if="!evidences.length" class="text-center p-4" role="status">
+        <i class="pi pi-images text-4xl text-300 mb-2" aria-hidden="true"></i>
         <p class="text-secondary">{{ t('receptions.evidence.noEvidence') }}</p>
       </div>
 
@@ -54,8 +54,8 @@ function closeDialog() {
             <div class="p-3">
               <p class="font-medium text-sm text-primary mb-1">{{ ev.caption }}</p>
               <div class="flex justify-content-between align-items-center text-xs text-secondary">
-                <span><i class="pi pi-calendar mr-1"></i>{{ new Date(ev.capturedAt).toLocaleString() }}</span>
-                <span class="tag-evidence">{{ ev.type || 'FOTO' }}</span>
+                <span><i class="pi pi-calendar mr-1" aria-hidden="true"></i>{{ new Date(ev.capturedAt).toLocaleString() }}</span>
+                <span class="tag-evidence">{{ ev.type || t('receptions.evidence.photoTag') }}</span>
               </div>
             </div>
           </div>
