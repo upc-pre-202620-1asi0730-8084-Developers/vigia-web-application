@@ -143,30 +143,36 @@ async function handleConfirmReception(reception) {
 
       <div class="header-actions-row flex align-items-center gap-3">
         <!-- Switch interactivo de perspectivas (Responsable de Obra vs Supervisor) -->
-        <div class="perspective-switcher flex align-items-center p-1 border-round surface-border border-1">
+        <div
+          class="perspective-switcher flex align-items-center p-1 border-round surface-border border-1"
+          role="group"
+          :aria-label="t('receptions.a11y.perspectiveGroup')"
+        >
           <button
             type="button"
             class="perspective-btn"
             :class="{ active: currentPerspective === 'site_manager' }"
+            :aria-pressed="currentPerspective === 'site_manager'"
             @click="currentPerspective = 'site_manager'"
           >
-            <i class="pi pi-user mr-1"></i>
+            <i class="pi pi-user mr-1" aria-hidden="true"></i>
             {{ t('receptions.perspective.siteManager') }}
           </button>
           <button
             type="button"
             class="perspective-btn"
             :class="{ active: currentPerspective === 'supervisor' }"
+            :aria-pressed="currentPerspective === 'supervisor'"
             @click="currentPerspective = 'supervisor'"
           >
-            <i class="pi pi-shield mr-1"></i>
+            <i class="pi pi-shield mr-1" aria-hidden="true"></i>
             {{ t('receptions.perspective.supervisor') }}
           </button>
         </div>
 
         <!-- Indicador de fecha del mockup -->
         <div class="date-badge">
-          <i class="pi pi-calendar mr-2 text-secondary"></i>
+          <i class="pi pi-calendar mr-2 text-secondary" aria-hidden="true"></i>
           <span>{{ formattedDate }}</span>
         </div>
 
@@ -181,8 +187,8 @@ async function handleConfirmReception(reception) {
     </div>
 
     <!-- Indicador de carga -->
-    <div v-if="receptionStore.loading && !receptionStore.receptions.length" class="text-center p-6">
-      <i class="pi pi-spin pi-spinner text-4xl text-primary mb-2"></i>
+    <div v-if="receptionStore.loading && !receptionStore.receptions.length" class="text-center p-6" role="status" aria-live="polite">
+      <i class="pi pi-spin pi-spinner text-4xl text-primary mb-2" aria-hidden="true"></i>
       <p class="text-secondary">{{ t('common.loading') }}</p>
     </div>
 
@@ -274,6 +280,11 @@ async function handleConfirmReception(reception) {
   background-color: var(--color-surface);
   color: var(--color-primary);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.perspective-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 @media (max-width: 960px) {

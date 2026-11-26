@@ -779,7 +779,35 @@
     },
     "evidence": {
       "galleryTitle": "Galería de evidencias fotográficas",
-      "noEvidence": "No hay fotografías adjuntas a esta recepción."
+      "noEvidence": "No hay fotografías adjuntas a esta recepción.",
+      "photoTag": "FOTO"
+    },
+    "filters": {
+      "last7days": "Últimos 7 días",
+      "today": "Hoy",
+      "month": "Este mes",
+      "all": "Todos",
+      "allProjects": "Todos los proyectos",
+      "allStatuses": "Todos los estados"
+    },
+    "a11y": {
+      "perspectiveGroup": "Perspectiva de vista de recepciones",
+      "timeFilter": "Filtrar recepciones por periodo",
+      "closeDetails": "Cerrar panel de detalle de recepción",
+      "detailsPanel": "Detalle de la recepción seleccionada",
+      "moreOptions": "Más opciones para {id}",
+      "openGallery": "Abrir galería de evidencias fotográficas",
+      "openEvidenceThumb": "Ver fotografía de evidencia {caption}",
+      "previousPage": "Página anterior",
+      "nextPage": "Página siguiente",
+      "paginationNav": "Paginación de tabla de recepciones",
+      "rowsPerPageLabel": "Filas por página",
+      "totalLabel": "Total",
+      "totalItems": "Total de ítems: {count}",
+      "sentBarLabel": "Cantidad despachada",
+      "receivedBarLabel": "Cantidad recibida",
+      "observationsCount": "{count} / 500 caracteres",
+      "discrepancyHint": "Sube al menos una fotografía e ingresa observaciones para reportar la discrepancia."
     }
   },
   "orders": {

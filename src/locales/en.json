@@ -779,7 +779,35 @@
     },
     "evidence": {
       "galleryTitle": "Photographic Evidence Gallery",
-      "noEvidence": "No photographs attached to this reception."
+      "noEvidence": "No photographs attached to this reception.",
+      "photoTag": "PHOTO"
+    },
+    "filters": {
+      "last7days": "Last 7 days",
+      "today": "Today",
+      "month": "This month",
+      "all": "All",
+      "allProjects": "All projects",
+      "allStatuses": "All statuses"
+    },
+    "a11y": {
+      "perspectiveGroup": "Reception view perspective",
+      "timeFilter": "Filter receptions by date range",
+      "closeDetails": "Close reception details panel",
+      "detailsPanel": "Selected reception details",
+      "moreOptions": "More options for {id}",
+      "openGallery": "Open photographic evidence gallery",
+      "openEvidenceThumb": "View stored evidence photo {caption}",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "paginationNav": "Receptions table pagination",
+      "rowsPerPageLabel": "Rows per page",
+      "totalLabel": "Total",
+      "totalItems": "Total items: {count}",
+      "sentBarLabel": "Dispatched quantity",
+      "receivedBarLabel": "Received quantity",
+      "observationsCount": "{count} / 500 characters",
+      "discrepancyHint": "Upload at least one photograph and enter observations to submit the discrepancy."
     }
   },
   "orders": {

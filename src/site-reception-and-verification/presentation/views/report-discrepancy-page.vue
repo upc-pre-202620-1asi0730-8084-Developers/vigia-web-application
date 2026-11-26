@@ -143,7 +143,7 @@ async function report() {
     <pv-button v-if="!reception && !loading" :label="t('evidenceFiles.reload')" @click="load" />
     <template v-if="reception">
       <p>{{ reception.siteName }} · {{ reception.deliveryNoteNumber }} · #{{ reception.id }}</p>
-      <div v-if="reported" class="flex align-items-center gap-3 flex-wrap" role="status">
+      <div v-if="reported" class="flex align-items-center gap-3 flex-wrap" role="status" aria-live="polite">
         <span>{{ t('evidenceFiles.reported') }}</span>
         <pv-button
           v-if="linkedCase"
@@ -159,7 +159,19 @@ async function report() {
       </div>
       <template v-if="!reported && !closed">
         <label for="discrepancy-observations">{{ t('evidenceFiles.observations') }}</label>
-        <textarea id="discrepancy-observations" v-model="observations" maxlength="500" :disabled="busy" rows="4" />
+        <textarea
+          id="discrepancy-observations"
+          v-model="observations"
+          maxlength="500"
+          :disabled="busy"
+          rows="4"
+          aria-required="true"
+          aria-describedby="discrepancy-observations-meta discrepancy-submit-hint"
+        />
+        <small id="discrepancy-observations-meta">{{ t('receptions.a11y.observationsCount', { count: observations.length }) }}</small>
+        <p id="discrepancy-submit-hint" v-if="!photos.length || !observations.trim()" class="m-0 text-sm text-secondary" role="status" aria-live="polite">
+          {{ t('receptions.a11y.discrepancyHint') }}
+        </p>
         <pv-button :label="t('evidenceFiles.report')" :loading="submitting" :disabled="busy || !photos.length || !observations.trim()" @click="report" />
       </template>
     </template>
