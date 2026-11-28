@@ -7,6 +7,11 @@
     "sloganLine2": "Projects under control.",
     "sloganFooter": "Vigía | Tracking platform for construction and logistics."
   },
+  "footer": {
+    "legalLabel": "Legal information",
+    "terms": "Terms and conditions",
+    "privacy": "Privacy and security policy"
+  },
   "nav": {
     "home": "Home",
     "sites": "Job Sites",
