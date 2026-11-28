@@ -7,6 +7,11 @@
     "sloganLine2": "Obras bajo control.",
     "sloganFooter": "Vigía | Plataforma de trazabilidad para construcción y logística."
   },
+  "footer": {
+    "legalLabel": "Información legal",
+    "terms": "Términos y condiciones",
+    "privacy": "Política de privacidad y seguridad"
+  },
   "nav": {
     "home": "Inicio",
     "sites": "Obras",
